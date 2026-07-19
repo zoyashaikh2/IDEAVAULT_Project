@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Idea Generator — IdeaVault</title>
+  <meta name="description" content="Generate innovative startup ideas using real AI analysis — market gaps, innovation angles, and actionable plans powered by Claude AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/ai-generator.css" />
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+
+      <div class="iv-page gen-page">
+        <h1><i class="fa-solid fa-robot"></i> AI Idea Generator Bot</h1>
+        <p class="sub">Describe your vision, pick a sector — and let real AI create a unique startup concept with market analysis and innovation strategy.</p>
+
+        <!-- ── Hero Input ── -->
+        <section class="card gen-hero" id="gen-hero">
+          <h2>🧠 What Do You Want to Build?</h2>
+          <p class="hero-sub">Our AI analyzes market gaps, competition landscapes, and innovation trends to generate a complete startup concept.</p>
+          <form class="gen-form" id="gen-form" novalidate>
+            <div class="gen-row">
+              <div>
+                <label class="iv-label" for="gen-category">Industry / Sector *</label>
+                <select id="gen-category" class="iv-input" required>
+                  <option value="">— select a category —</option>
+                </select>
+              </div>
+              <div>
+                <label class="iv-label" for="gen-target">Target Audience (optional)</label>
+                <input id="gen-target" class="iv-input" placeholder="e.g. Small business owners, students, farmers…" />
+              </div>
+            </div>
+            <div>
+              <label class="iv-label" for="gen-desc">Describe Your Idea Concept *</label>
+              <textarea id="gen-desc" class="iv-input gen-textarea" rows="5" required
+                placeholder="Tell the AI what you want to build... e.g. 'I want to create an AI tool that helps small restaurants optimize their food waste and predict daily demand based on weather, local events, and historical patterns.'"></textarea>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+              <button type="submit" class="gen-btn" id="gen-btn">
+                <span class="spinner"></span>
+                <span class="btn-text">🤖 Generate Idea with AI</span>
+              </button>
+              <span id="gen-error" style="font-size:.88rem;color:var(--danger)"></span>
+            </div>
+          </form>
+        </section>
+
+        <!-- ── Loading Animation ── -->
+        <div class="gen-loading" id="gen-loading">
+          <div class="brain-anim">🧠</div>
+          <h3>AI is Thinking<span class="thinking-dots"></span></h3>
+          <p id="loading-status">Analyzing market landscape and innovation opportunities…</p>
+        </div>
+
+        <!-- ── Result Card ── -->
+        <section class="card gen-result" id="gen-result">
+          <div class="result-header">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+              <div>
+                <h2 id="res-title">Generated Idea</h2>
+                <span class="category-tag" id="res-category"></span>
+              </div>
+              <div style="font-size:.82rem;opacity:.85" id="res-meta"></div>
+            </div>
+          </div>
+          <div class="result-body">
+            <!-- Problem / Solution -->
+            <div class="result-grid result-section">
+              <div class="result-cell problem">
+                <span class="cell-label"><i class="fa-solid fa-triangle-exclamation"></i> Problem</span>
+                <div class="cell-text" id="res-problem"></div>
+              </div>
+              <div class="result-cell solution">
+                <span class="cell-label"><i class="fa-solid fa-lightbulb"></i> Solution</span>
+                <div class="cell-text" id="res-solution"></div>
+              </div>
+            </div>
+
+            <!-- Customer / Unique Value -->
+            <div class="result-grid result-section">
+              <div class="result-cell customer">
+                <span class="cell-label"><i class="fa-solid fa-users"></i> Ideal Customer</span>
+                <div class="cell-text" id="res-customer"></div>
+              </div>
+              <div class="result-cell unique">
+                <span class="cell-label"><i class="fa-solid fa-star"></i> Unique Value Proposition</span>
+                <div class="cell-text" id="res-unique"></div>
+              </div>
+            </div>
+
+            <!-- Innovation & Market -->
+            <div class="result-grid result-section">
+              <div class="result-insight">
+                <span class="insight-label"><i class="fa-solid fa-rocket"></i> Innovation Angle</span>
+                <div class="insight-text" id="res-innovation"></div>
+              </div>
+              <div class="result-insight">
+                <span class="insight-label"><i class="fa-solid fa-chart-line"></i> Market Gap Identified</span>
+                <div class="insight-text" id="res-gap"></div>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="result-section">
+              <span class="result-label">Suggested Tags</span>
+              <div class="result-tags" id="res-tags"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="result-actions">
+              <button class="iv-btn iv-btn-primary" id="btn-use-idea">
+                <i class="fa-solid fa-arrow-right"></i> Use This Idea
+              </button>
+              <button class="iv-btn iv-btn-secondary" id="btn-regenerate">
+                <i class="fa-solid fa-arrows-rotate"></i> Generate Another
+              </button>
+              <button class="iv-btn iv-btn-ghost" id="btn-save-history">
+                <i class="fa-solid fa-bookmark"></i> Save to History
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Past Generated Ideas ── -->
+        <section class="gen-history" id="gen-history">
+          <h3><i class="fa-solid fa-clock-rotate-left"></i> Previously Generated Ideas</h3>
+          <div id="history-grid"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="/iv-categories.js"></script>
+  <script src="/iv-money.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script src="/ai-generator.js"></script>
+</body>
+</html>

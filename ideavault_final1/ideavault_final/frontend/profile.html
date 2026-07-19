@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <style>
+    .prof-page{max-width:1100px;padding-top:0}
+    .prof-banner{height:220px;background:linear-gradient(135deg,#6366f1,#3b82f6,#10b981);border-radius:0 0 24px 24px;position:relative;margin-bottom:80px}
+    .prof-avatar{position:absolute;bottom:-64px;left:36px;width:128px;height:128px;border-radius:50%;border:4px solid var(--card);object-fit:cover;background:var(--bg)}
+    .prof-avatar-fallback{position:absolute;bottom:-64px;left:36px;width:128px;height:128px;border-radius:50%;border:4px solid var(--card);background:linear-gradient(135deg,#eef2ff,#c7d2fe);display:flex;align-items:center;justify-content:center;font-size:2.75rem}
+    .prof-info{padding:0 36px 22px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .prof-name{margin:0 0 4px;font-size:1.55rem;font-weight:800}
+    .prof-occ{color:var(--muted);font-size:.95rem;margin:0 0 8px}
+    .prof-bio{font-size:.9rem;color:var(--muted);max-width:60ch;margin:0 0 12px}
+    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+    .prof-badge{padding:5px 14px;border-radius:50px;font-size:.78rem;font-weight:700;background:rgba(99,102,241,.12);color:var(--accent)}
+    .prof-contact{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted)}
+    .prof-contact i{color:var(--accent);width:16px}
+    .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin:0 36px 24px;cursor:pointer}
+    .stat-card{padding:16px;text-align:center}
+    .stat-card.active-filter{border-color:var(--accent);background:rgba(99,102,241,.08)}
+    .stat-card .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;display:block;margin-bottom:6px}
+    .stat-card strong{font-size:1.55rem;font-weight:800}
+    .ideas-section{padding:0 36px}
+    .ideas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .edit-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+    .edit-modal-backdrop.open{opacity:1;pointer-events:auto}
+    .edit-modal{background:var(--card);color:var(--text);border-radius:22px;border:1px solid var(--border);max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:28px}
+    .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+    .edit-grid .span-2{grid-column:span 2}
+    @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr);margin:0 20px 20px}.prof-info{padding:0 20px 18px}.ideas-section{padding:0 20px}.ideas-grid{grid-template-columns:1fr}}
+    @media(max-width:480px){.stats-grid{grid-template-columns:1fr 1fr}}
+    .empty{text-align:center;padding:40px;color:var(--muted)}
+    #prof-insights-card{margin:0 36px 24px}
+    @media(max-width:768px){#prof-insights-card{margin:0 20px 20px}}
+  </style>
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left"><button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button></div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+      <div class="iv-page prof-page" style="padding:0 0 48px">
+        <div class="prof-banner">
+          <img id="prof-avatar" class="prof-avatar" alt="" hidden />
+          <div id="prof-avatar-fallback" class="prof-avatar-fallback">👤</div>
+        </div>
+
+        <div class="prof-info">
+          <div>
+            <h1 class="prof-name" id="pf-name">Loading…</h1>
+            <p class="prof-occ" id="pf-occ"></p>
+            <p class="prof-bio" id="pf-bio"></p>
+            <div class="badge-row" id="pf-badges"></div>
+            <div class="prof-contact" id="pf-contact"></div>
+          </div>
+          <div id="pf-actions"></div>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+          <div class="card stat-card" data-filter="all"><span class="lbl">Ideas</span><strong id="st-ideas">0</strong></div>
+          <div class="card stat-card" data-filter="published"><span class="lbl">Published</span><strong id="st-pub">0</strong></div>
+          <div class="card stat-card" data-filter="draft"><span class="lbl">Drafts</span><strong id="st-draft">0</strong></div>
+          <div class="card stat-card" data-filter="liked"><span class="lbl">Liked</span><strong id="st-liked">0</strong></div>
+          <div class="card stat-card" data-filter="commented"><span class="lbl">Commented</span><strong id="st-commented">0</strong></div>
+          <div class="card stat-card"><span class="lbl">Views</span><strong id="st-views">0</strong></div>
+        </div>
+
+        <div class="card" id="prof-insights-card" style="padding:18px 20px">
+          <h3 style="margin:0 0 10px;font-size:1rem;font-weight:700">Activity &amp; insights</h3>
+          <div id="prof-insight-body" style="font-size:0.88rem;color:var(--muted);line-height:1.65"></div>
+        </div>
+
+        <div class="ideas-section">
+          <h2 style="margin:0 0 16px;font-size:1.1rem;font-weight:700" id="ideas-heading">All Ideas</h2>
+          <div class="ideas-grid" id="prof-ideas"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit modal -->
+  <div class="edit-modal-backdrop" id="edit-modal">
+    <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <h3 id="edit-modal-title" style="margin:0;font-size:1.1rem">Edit Profile</h3>
+        <button class="iv-icon-btn" id="btn-close-edit" aria-label="Close">✕</button>
+      </div>
+      <div id="edit-msg" style="min-height:1rem;font-size:.9rem;margin-bottom:10px"></div>
+      <form id="edit-form" class="edit-grid" novalidate>
+        <div class="span-2" style="text-align:center;margin-bottom:4px">
+          <img id="edit-avatar-preview" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:8px" alt="" />
+          <br/>
+          <label class="iv-btn iv-btn-secondary iv-btn-sm" style="cursor:pointer">
+            <i class="fa-solid fa-image"></i> Change photo
+            <input type="file" id="edit-avatar-file" accept="image/*" style="display:none" />
+          </label>
+        </div>
+        <div><label class="iv-label" for="e-name">Full Name</label><input id="e-name" class="iv-input" /></div>
+        <div><label class="iv-label" for="e-occupation">Occupation</label><input id="e-occupation" class="iv-input" /></div>
+        <div><label class="iv-label" for="e-location">Location</label><input id="e-location" class="iv-input" /></div>
+        <div><label class="iv-label" for="e-phone">Phone</label><input id="e-phone" class="iv-input" type="tel" maxlength="10" /></div>
+        <div>
+          <label class="iv-label" for="e-exp">Experience</label>
+          <select id="e-exp" class="iv-input">
+            <option>0-1 years</option><option>1-3 years</option><option>3-5 years</option><option>5-10 years</option><option>10+ years</option>
+          </select>
+        </div>
+        <div><label class="iv-label" for="e-dob">Date of Birth</label><input id="e-dob" class="iv-input" type="date" /></div>
+        <div class="span-2"><label class="iv-label" for="e-bio">Bio</label><textarea id="e-bio" class="iv-input" rows="3" style="resize:vertical"></textarea></div>
+        <div class="span-2"><button type="submit" class="iv-btn iv-btn-primary iv-btn-block"><i class="fa-solid fa-floppy-disk"></i> Save changes</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Idea detail popup -->
+  <div class="iv-popup-backdrop" id="popup-idea">
+    <div class="iv-popup" role="dialog" aria-modal="true">
+      <button class="iv-popup-close" data-close-idea>✕</button>
+      <div class="iv-popup-body" id="idea-popup-body"></div>
+    </div>
+  </div>
+
+  <div class="iv-popup-backdrop" id="popup-strat" aria-hidden="true">
+    <div class="iv-popup iv-popup-full" role="dialog" aria-modal="true">
+      <button type="button" class="iv-popup-close" data-close-strat-prof aria-label="Close">✕</button>
+      <div class="strat-toolbar">
+        <h2 class="strat-title" data-strat-title-prof>Strategic Analytics</h2>
+        <div class="strat-actions">
+          <button type="button" class="iv-btn iv-btn-secondary iv-btn-sm" data-print-strat-prof><i class="fa-solid fa-file-pdf"></i> Print</button>
+        </div>
+      </div>
+      <div class="strat-panes">
+        <div class="strat-left iv-popup-body" data-strat-left-prof></div>
+        <div class="strat-right iv-popup-body" data-strat-right-prof></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/iv-money.js"></script>
+  <script src="/contact-creator.js"></script>
+  <script src="/strategic-shared.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script src="/ideacard-shared.js"></script>
+  <script>
+  var API = window.location.origin + '/api';
+  function esc(s){var d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML;}
+
+  function checkAuthenticity(id) {
+    if (typeof window.IdeaVaultStrategic !== 'undefined' && window.IdeaVaultStrategic.checkAuthenticity) {
+      window.IdeaVaultStrategic.checkAuthenticity(id);
+    } else {
+      alert('Authenticity module loading...');
+    }
+  }
+
+  function downloadReport(id) {
+    window.open(API + '/reports/pdf/' + id, '_blank');
+  }
+
+  var params=new URL(window.location.href).searchParams;
+  var profileUserId=params.get('userId')||window._ivUserId||localStorage.getItem('ideavault_userId');
+  var isSelf=String(profileUserId)===String(window._ivUserId||localStorage.getItem('ideavault_userId'));
+  var profileUser=null;
+  var allUserIdeas=[];
+  var activityData={likedIdeas:[],commentedIdeas:[]};
+  var activeFilter='all';
+
+  function setFilter(f){
+    activeFilter=f;
+    document.querySelectorAll('[data-filter]').forEach(function(el){el.classList.toggle('active-filter',el.getAttribute('data-filter')===f);});
+    renderIdeas();
+  }
+
+  document.querySelectorAll('[data-filter]').forEach(function(el){
+    el.addEventListener('click',function(){setFilter(el.getAttribute('data-filter'));});
+  });
+
+  function renderIdeas(){
+    var grid=document.getElementById('prof-ideas');
+    var heading=document.getElementById('ideas-heading');
+    var ideas=[];
+    if(activeFilter==='all') ideas=allUserIdeas;
+    else if(activeFilter==='published') ideas=allUserIdeas.filter(function(i){return i.status==='Published';});
+    else if(activeFilter==='draft') ideas=allUserIdeas.filter(function(i){return i.status==='Draft';});
+    else if(activeFilter==='liked') ideas=activityData.likedIdeas;
+    else if(activeFilter==='commented') ideas=activityData.commentedIdeas;
+    var labels={all:'All Ideas',published:'Published',draft:'Drafts',liked:'Liked Ideas',commented:'Commented Ideas'};
+    heading.textContent=labels[activeFilter]||'Ideas';
+    if(!ideas||!ideas.length){grid.innerHTML='<p class="empty">No ideas here yet.</p>';return;}
+    grid.innerHTML=ideas.map(function(idea){
+      return IdeaVaultCard.render(idea);
+    }).join('');
+    
+    grid.querySelectorAll('[data-idea-id]').forEach(function(article){
+      var id=article.getAttribute('data-idea-id');
+      var idea=allUserIdeas.find(function(i){return String(i._id)===String(id);});
+      if(idea&&window.IdeaVaultCard&&IdeaVaultCard.initSparkline) IdeaVaultCard.initSparkline(id,idea.viewsHistory||[]);
+    });
+    if(window.IdeaVaultContact&&IdeaVaultContact.wireContactButtons) IdeaVaultContact.wireContactButtons(grid);
+
+    grid.querySelectorAll('[data-idea-id]').forEach(function(wrap){
+      var id=wrap.getAttribute('data-idea-id');
+      wrap.querySelectorAll('[data-read]').forEach(function(b){
+        b.addEventListener('click',function(ev){ev.stopPropagation();openIdeaPopup(id);});
+      });
+      wrap.querySelectorAll('[data-strat-open]').forEach(function(b){
+        b.addEventListener('click',function(ev){ev.stopPropagation();openProfStrat(id);});
+      });
+      // Add a delete button to the card if it's the user's own profile
+      if(isSelf) {
+        var footer = wrap.querySelector('.iv-card-btn-group');
+        if(footer) {
+          var delBtn = document.createElement('button');
+          delBtn.className = 'iv-btn iv-btn-ghost iv-btn-xs';
+          delBtn.style.color = 'var(--danger)';
+          delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+          delBtn.onclick = function(e) { e.stopPropagation(); deleteMyIdea(id); };
+          footer.prepend(delBtn);
+
+          // Also add an Edit button for drafts or published if owner
+          var editBtn = document.createElement('a');
+          editBtn.className = 'iv-btn iv-btn-secondary iv-btn-sm';
+          editBtn.href = '/create-idea.html?id=' + encodeURIComponent(id);
+          editBtn.innerHTML = 'Edit';
+          footer.prepend(editBtn);
+        }
+      }
+    });
+  }
+
+  function openProfStrat(id){
+    if(!window.IdeaVaultStrategic)return;
+    fetch(API+'/ideas/'+encodeURIComponent(id)+'?noView=1').then(function(r){return r.json();}).then(function(idea){
+      if(!idea||idea.error)return;
+      document.querySelector('[data-strat-title-prof]').textContent=idea.title||'Analytics';
+      document.querySelector('[data-strat-left-prof]').innerHTML=IdeaVaultStrategic.stratLeftHtml(idea);
+      document.querySelector('[data-strat-right-prof]').innerHTML=IdeaVaultStrategic.stratRightHtml(idea);
+      if(window.IdeaVaultContact&&IdeaVaultContact.wireContactButtons) IdeaVaultContact.wireContactButtons(document.querySelector('[data-strat-left-prof]'));
+      document.getElementById('popup-strat').classList.add('is-open');
+    }).catch(function(){});
+  }
+  function deleteMyIdea(id){
+    if(!confirm('Delete this idea permanently?'))return;
+    var tok=localStorage.getItem('ideavault_token')||'';
+    fetch(API+'/ideas/'+encodeURIComponent(id),{method:'DELETE',headers:{Authorization:'Bearer '+tok}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.error){alert(d.error);return;}
+        allUserIdeas=allUserIdeas.filter(function(i){return String(i._id)!==String(id);});
+        renderIdeas();
+      }).catch(function(){alert('Delete failed');});
+  }
+
+  document.querySelector('[data-close-strat-prof]').addEventListener('click',function(){document.getElementById('popup-strat').classList.remove('is-open');});
+  document.getElementById('popup-strat').addEventListener('click',function(e){if(e.target&&e.target.id==='popup-strat') document.getElementById('popup-strat').classList.remove('is-open');});
+  document.querySelector('[data-print-strat-prof]').addEventListener('click',function(){window.print();});
+
+  function openIdeaPopup(id){
+    fetch(API+'/ideas/'+encodeURIComponent(id)).then(function(r){return r.json();}).then(function(idea){
+      if(!idea||idea.error) return;
+      var body=document.getElementById('idea-popup-body');
+      var viewerId=window._ivUserId||localStorage.getItem('ideavault_userId');
+      var viewerName=(profileUser&&profileUser.name)||'User';
+      var comHtml=(idea.comments&&idea.comments.length)?idea.comments.map(function(c){
+        return '<li style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>'+esc(c.user||'User')+'</strong><br>'+esc(c.text)+'</li>';
+      }).join(''):'<li style="color:var(--muted)">No comments yet.</li>';
+      body.innerHTML='<div style="height:160px;border-radius:16px;margin-bottom:16px;background:linear-gradient(135deg,#6366f1,#3b82f6);display:flex;align-items:flex-end;padding:16px;color:#fff;overflow:hidden;position:relative">'
+        +(idea.image&&idea.image.indexOf('data:')===0?'<img src="'+esc(idea.image)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35" alt="" />':'')
+        +'<h3 style="position:relative;margin:0;font-size:1.3rem">'+esc(idea.title)+'</h3></div>'
+        +'<div style="padding:0 0 16px"><p style="color:var(--muted);font-size:.95rem;line-height:1.55">'+esc(idea.aiSummary||idea.summary||'')+'</p></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;font-size:0.82rem;text-align:center">'
+        +'<div class="card" style="padding:8px">Views<br><strong>'+(idea.views||0)+'</strong></div>'
+        +'<div class="card" style="padding:8px">Likes<br><strong>'+((idea.likes||[]).length)+'</strong></div>'
+        +'<div class="card" style="padding:8px">Comments<br><strong>'+((idea.comments||[]).length)+'</strong></div></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+        +'<div style="padding:12px;border-radius:12px;border:1px solid var(--border);border-left:4px solid #f87171;font-size:.88rem"><strong>Problem</strong><p style="margin:6px 0 0;color:var(--muted)">'+esc((idea.problem||'').slice(0,200))+'</p></div>'
+        +'<div style="padding:12px;border-radius:12px;border:1px solid var(--border);border-left:4px solid var(--success);font-size:.88rem"><strong>Solution</strong><p style="margin:6px 0 0;color:var(--muted)">'+esc((idea.solution||'').slice(0,200))+'</p></div></div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">'
+        +'<a class="iv-btn iv-btn-primary iv-btn-sm" href="/create-idea.html?id='+esc(idea._id)+'">Edit</a>'
+        +'<a class="iv-btn iv-btn-secondary iv-btn-sm" href="/inspired.html">Community</a>'
+        +'<a class="iv-btn iv-btn-ghost iv-btn-sm" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(idea.email||'')+'&su='+encodeURIComponent('IdeaVault: '+idea.title)+'" target="_blank" rel="noopener">Email creator</a></div>'
+        +'<h4 style="margin:12px 0 8px;font-size:0.95rem">Discussion</h4><ul style="list-style:none;padding:0;margin:0 0 10px;font-size:0.88rem">'+comHtml+'</ul>'
+        +'<div style="display:flex;gap:8px;margin-bottom:14px"><input class="iv-input" style="flex:1" placeholder="Add a comment…" data-pf-comment-text />'
+        +'<button type="button" class="iv-btn iv-btn-primary iv-btn-sm" data-pf-post="'+esc(idea._id)+'">Post</button></div>'
+        +'<h4 style="margin:12px 0 8px;font-size:0.95rem">Private feedback (emailed to creator)</h4>'
+        +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap"><label style="font-size:0.88rem">Rating <select data-pf-rating class="iv-input" style="width:auto"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label></div>'
+        +'<textarea class="iv-input" rows="2" placeholder="Your feedback…" data-pf-fbtxt></textarea>'
+        +'<button type="button" class="iv-btn iv-btn-secondary iv-btn-sm" style="margin-top:8px" data-pf-fbgo="'+esc(idea._id)+'">Submit feedback</button>';
+      document.getElementById('popup-idea').classList.add('is-open');
+      var post=body.querySelector('[data-pf-post]');
+      if(post) post.addEventListener('click',function(){
+        var inp=body.querySelector('[data-pf-comment-text]');
+        var txt=inp&&inp.value.trim();
+        if(!txt||!viewerId) return;
+        fetch(API+'/ideas/'+encodeURIComponent(idea._id)+'/comment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:viewerId,user:viewerName,text:txt})})
+          .then(function(){inp.value='';openIdeaPopup(idea._id);}).catch(function(){});
+      });
+      var fb=body.querySelector('[data-pf-fbgo]');
+      if(fb) fb.addEventListener('click',function(){
+        var rt=body.querySelector('[data-pf-rating]');
+        var tx=body.querySelector('[data-pf-fbtxt]');
+        if(!viewerId){alert('Sign in to send feedback.');return;}
+        fetch(API+'/ideas/'+encodeURIComponent(idea._id)+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:viewerId,userName:viewerName,text:(tx&&tx.value)||'',rating:Number(rt&&rt.value)||5})})
+          .then(function(r){return r.json();}).then(function(d){if(d.error)alert(d.error);else{alert('Thanks — emailed to the creator.');if(tx)tx.value='';}}).catch(function(){});
+      });
+    }).catch(function(){});
+  }
+
+  document.querySelector('[data-close-idea]').addEventListener('click',function(){document.getElementById('popup-idea').classList.remove('is-open');});
+  document.getElementById('popup-idea').addEventListener('click',function(e){if(e.target&&e.target.id==='popup-idea') document.getElementById('popup-idea').classList.remove('is-open');});
+
+  // Load profile & analytics
+  function loadProfileData() {
+    Promise.all([
+      fetch(API+'/user/'+profileUserId).then(function(r){return r.json();}),
+      fetch(API+'/ideas/user/'+profileUserId).then(function(r){return r.json();}),
+      fetch(API+'/dashboard/activity/'+profileUserId).then(function(r){return r.json();}),
+      fetch(API+'/analytics/'+profileUserId).then(function(r){return r.json();})
+    ]).then(function(all){
+      var user=all[0];
+      var ideas=all[1]||[];
+      var activity=all[2]||{};
+      var analytics=all[3]||{};
+      if(user.error){document.getElementById('pf-name').textContent='User not found';return;}
+      profileUser=user;
+      allUserIdeas=ideas;
+      activityData=activity;
+
+      var ib=document.getElementById('prof-insight-body');
+      if(ib){
+        var lk=(activity.likedIdeas||[]);
+        var cm=(activity.commentedIdeas||[]);
+        
+        // Category pie chart
+        var pieHtml = '';
+        if (analytics.categoryDist && analytics.categoryDist.length > 0) {
+          var cx=100,cy=100,r=70,start=-Math.PI/2,paths=[];
+          var colors=['#6366f1','#10b981','#f59e0b','#8b5cf6','#ec4899'];
+          var totCat = analytics.categoryDist.reduce(function(s,c){return s+c.count},0)||1;
+          for(var i=0;i<analytics.categoryDist.length;i++){
+            var c=analytics.categoryDist[i];
+            var frac=(c.count/totCat)*Math.PI*2;
+            var x1=cx+r*Math.cos(start),y1=cy+r*Math.sin(start);
+            start+=frac;
+            var x2=cx+r*Math.cos(start),y2=cy+r*Math.sin(start);
+            var large=frac>Math.PI?1:0;
+            paths.push('<path d="M '+cx+' '+cy+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+' Z" fill="'+colors[i%colors.length]+'" stroke="#fff" stroke-width="1"><title>'+esc(c.cat)+': '+c.count+'</title></path>');
+          }
+          var legend=analytics.categoryDist.map(function(c,i){return '<li><span class="iv-dot" style="background:'+colors[i%colors.length]+'"></span>'+esc(c.cat)+' <strong>'+c.count+'</strong></li>'}).join('');
+          pieHtml='<div style="margin-bottom:16px"><h4 style="margin:0 0 8px;font-size:0.95rem;color:var(--text)">Category Mix</h4><div class="iv-pie-wrap iv-pie-compact" style="display:flex;align-items:center;gap:16px"><svg viewBox="0 0 200 200" width="120" height="120">'+paths.join('')+'</svg><ul class="iv-pie-legend" style="list-style:none;padding:0;margin:0;font-size:0.85rem">'+legend+'</ul></div></div>';
+        }
+
+        // 7-day sparkline
+        var lineHtml = '';
+        if (analytics.dailyViews && analytics.dailyViews.length > 0) {
+          var W=280,H=60,step=W/6;
+          var maxV = Math.max(1, Math.max.apply(null, analytics.dailyViews));
+          var d='M0,'+(H-(analytics.dailyViews[0]/maxV)*H);
+          for(var j=1;j<analytics.dailyViews.length;j++) d+=' L'+(j*step)+','+(H-(analytics.dailyViews[j]/maxV)*H);
+          lineHtml='<div style="margin-bottom:16px"><h4 style="margin:0 0 8px;font-size:0.95rem;color:var(--text)">Reach (7 days)</h4><svg viewBox="0 0 '+W+' '+H+'" width="100%" height="60" preserveAspectRatio="none"><path d="'+d+'" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/></svg></div>';
+        }
+
+        // Top trending
+        var topHtml = '';
+        if (analytics.trending && analytics.trending.length > 0) {
+          topHtml='<div style="margin-bottom:16px"><h4 style="margin:0 0 8px;font-size:0.95rem;color:var(--text)">Top Performing Ideas</h4><ul style="margin:0;padding-left:18px;font-size:0.88rem">'+analytics.trending.map(function(t){return '<li><strong>'+esc(t.title)+'</strong> · Score: '+t.compositeScore+'</li>'}).join('')+'</ul></div>';
+        }
+
+        ib.innerHTML= pieHtml + lineHtml + topHtml
+          +'<h4 style="margin:16px 0 8px;font-size:0.95rem;color:var(--text)">Your Activity</h4>'
+          +'<p style="margin:0 0 6px"><strong>Ideas you liked</strong> ('+lk.length+')</p>'
+          +'<p style="margin:0 0 12px"><strong>Ideas you commented on</strong> ('+cm.length+')</p>'
+          +'<p style="margin:0;font-size:0.82rem">Real-time stats from ML and actual engagement data.</p>'
+          + (isSelf
+            ? '<div id="prof-vc-snippet" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"></div>'
+            : '');
+        if (isSelf) {
+          var tokVc = localStorage.getItem('ideavault_token') || '';
+          var snVc = document.getElementById('prof-vc-snippet');
+          if (tokVc && snVc) {
+            fetch(API + '/vc/investments/me', { headers: { Authorization: 'Bearer ' + tokVc } })
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (rows) {
+                if (!Array.isArray(rows) || !rows.length) {
+                  snVc.innerHTML =
+                    '<strong>VC desk</strong><p style="margin:6px 0 0;font-size:0.86rem">No pipeline rows yet. <a href="/vc-dashboard.html">Open VC Desk</a></p>';
+                  return;
+                }
+                snVc.innerHTML =
+                  '<strong>VC desk</strong><p style="margin:6px 0 0;font-size:0.86rem">' +
+                  rows.length +
+                  ' pipeline row(s). <a href="/vc-dashboard.html">Open VC Desk</a></p>';
+              })
+              .catch(function () {});
+          }
+        }
+      }
+
+      // Banner + avatar
+      if(user.image){
+        var av=document.getElementById('prof-avatar');
+        av.src=user.image;av.hidden=false;
+        document.getElementById('prof-avatar-fallback').style.display='none';
+      }
+      document.getElementById('pf-name').textContent=user.name||'';
+      document.getElementById('pf-occ').textContent=user.occupation||'';
+      document.getElementById('pf-bio').textContent=user.bio||'';
+
+      // Badges
+      var badges=['Early Adopter'];
+      if(ideas.length>=5) badges.push('Top Contributor');
+      if(ideas.some(function(i){return i.status==='Published';})) badges.push('Innovator');
+      document.getElementById('pf-badges').innerHTML=badges.map(function(b){return '<span class="prof-badge">'+esc(b)+'</span>';}).join('');
+
+      // Contact
+      var c='';
+      if(user.email) c+='<span><i class="fa-solid fa-envelope"></i> '+esc(user.email)+'</span>';
+      if(user.address) c+='<span><i class="fa-solid fa-location-dot"></i> '+esc(user.address)+'</span>';
+      if(user.createdAt) c+='<span><i class="fa-regular fa-calendar"></i> Joined '+esc(new Date(user.createdAt).toLocaleDateString('en',{month:'long',year:'numeric'}))+'</span>';
+      document.getElementById('pf-contact').innerHTML=c;
+
+      // Actions
+      var act=document.getElementById('pf-actions');
+      if(isSelf){
+        act.innerHTML='<button class="iv-btn iv-btn-primary" id="btn-edit-prof"><i class="fa-solid fa-pen-to-square"></i> Edit Profile</button>';
+        document.getElementById('btn-edit-prof').addEventListener('click',openEditModal);
+      } else {
+        act.innerHTML='<a class="iv-btn iv-btn-primary" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(user.email||'')+'&su='+encodeURIComponent('Connection via IdeaVault')+'" target="_blank"><i class="fa-solid fa-envelope"></i> Contact</a>';
+      }
+
+      // Stats
+      var totalLikes=ideas.reduce(function(s,i){return s+((i.likes||[]).length);},0);
+      var totalComments=ideas.reduce(function(s,i){return s+((i.comments||[]).length);},0);
+      var totalViews=ideas.reduce(function(s,i){return s+(i.views||0);},0);
+      document.getElementById('st-ideas').textContent=ideas.length;
+      document.getElementById('st-pub').textContent=ideas.filter(function(i){return i.status==='Published';}).length;
+      document.getElementById('st-draft').textContent=ideas.filter(function(i){return i.status==='Draft';}).length;
+      document.getElementById('st-liked').textContent=(activity.likedIdeas||[]).length;
+      document.getElementById('st-commented').textContent=(activity.commentedIdeas||[]).length;
+      document.getElementById('st-views').textContent=totalViews;
+
+      renderIdeas();
+    }).catch(function(e){
+      console.error(e);
+      document.getElementById('pf-name').textContent='Error loading profile';
+    });
+  }
+
+  loadProfileData();
+  document.addEventListener('ideavault:refresh', loadProfileData);
+
+
+  // Edit modal
+  function openEditModal(){
+    if(!profileUser) return;
+    document.getElementById('edit-avatar-preview').src=profileUser.image||'';
+    document.getElementById('e-name').value=profileUser.name||'';
+    document.getElementById('e-occupation').value=profileUser.occupation||'';
+    document.getElementById('e-location').value=profileUser.address||'';
+    document.getElementById('e-phone').value=profileUser.phone||'';
+    document.getElementById('e-exp').value=profileUser.experience||'0-1 years';
+    document.getElementById('e-dob').value=profileUser.dob?new Date(profileUser.dob).toISOString().slice(0,10):'';
+    document.getElementById('e-bio').value=profileUser.bio||'';
+    document.getElementById('edit-modal').classList.add('open');
+  }
+
+  document.getElementById('btn-close-edit').addEventListener('click',function(){document.getElementById('edit-modal').classList.remove('open');});
+  document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target&&e.target.id==='edit-modal') document.getElementById('edit-modal').classList.remove('open');});
+
+  document.getElementById('edit-avatar-file').addEventListener('change',function(){
+    var f=this.files&&this.files[0];if(!f) return;
+    var reader=new FileReader();
+    reader.onload=function(ev){document.getElementById('edit-avatar-preview').src=String(ev.target.result||'');};
+    reader.readAsDataURL(f);
+  });
+
+  document.getElementById('edit-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var msg=document.getElementById('edit-msg');
+    msg.textContent='Saving…';msg.style.color='var(--muted)';
+    var token=localStorage.getItem('ideavault_token')||'';
+    var imgPreview=document.getElementById('edit-avatar-preview').src;
+    var payload={
+      name:document.getElementById('e-name').value.trim(),
+      occupation:document.getElementById('e-occupation').value.trim(),
+      address:document.getElementById('e-location').value.trim(),
+      phone:document.getElementById('e-phone').value.trim(),
+      experience:document.getElementById('e-exp').value,
+      dob:document.getElementById('e-dob').value||undefined,
+      bio:document.getElementById('e-bio').value.trim(),
+    };
+    if(imgPreview&&imgPreview.indexOf('data:')===0) payload.image=imgPreview;
+    fetch(API+'/users/'+profileUserId,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json();}).then(function(u){
+      if(u.error){msg.textContent=u.error;msg.style.color='var(--danger)';return;}
+      profileUser=u;
+      msg.textContent='Saved!';msg.style.color='var(--success)';
+      document.getElementById('pf-name').textContent=u.name||'';
+      document.getElementById('pf-occ').textContent=u.occupation||'';
+      document.getElementById('pf-bio').textContent=u.bio||'';
+      if(u.image){var av=document.getElementById('prof-avatar');av.src=u.image;av.hidden=false;document.getElementById('prof-avatar-fallback').style.display='none';}
+      setTimeout(function(){document.getElementById('edit-modal').classList.remove('open');},700);
+    }).catch(function(){msg.textContent='Save failed.';msg.style.color='var(--danger)';});
+  });
+  </script>
+</body>
+</html>

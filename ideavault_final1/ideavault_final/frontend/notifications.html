@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notifications — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --glass-bg: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body.dark-mode {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --glass-bg: rgba(30, 41, 59, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body:not(.dark-mode) {
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(99, 102, 241, 0.12);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    .nt-page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .nt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+
+    .nt-title-block h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #6366f1, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nt-title-block p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .nt-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nt-btn-action {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .nt-btn-action:hover {
+      transform: translateY(-2px);
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+    }
+
+    .nt-btn-action i {
+      font-size: 0.9rem;
+    }
+
+    .nt-list-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    .nt-item {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      margin-bottom: 12px;
+      background: rgba(var(--card-rgb, 255, 255, 255), 0.02);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .nt-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .nt-item:hover {
+      transform: scale(1.01) translateY(-2px);
+      background: rgba(99, 102, 241, 0.04);
+      border-color: rgba(99, 102, 241, 0.15);
+    }
+
+    .nt-item.unread {
+      background: rgba(99, 102, 241, 0.07);
+      border-left: 4px solid var(--accent);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.05);
+    }
+
+    .nt-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nt-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge-idea {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+
+    .badge-ai-summary {
+      background: rgba(139, 92, 246, 0.15);
+      color: #8b5cf6;
+    }
+
+    .badge-ai-analysis {
+      background: rgba(99, 102, 241, 0.15);
+      color: #6366f1;
+    }
+
+    .badge-ai-roadmap {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+    }
+
+    .badge-vc {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+    }
+
+    .nt-time {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nt-body {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .nt-item-footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .nt-action-hint {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 600;
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .nt-item:hover .nt-action-hint {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .nt-empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-muted);
+    }
+
+    .nt-empty-state i {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .nt-empty-state h3 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .nt-empty-state p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.5; }
+      100% { transform: scale(0.95); opacity: 1; }
+    }
+
+    .unread-indicator {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button type="button" class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>System Alerts</div>
+        <div class="iv-topnav-actions">
+          <button type="button" class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button type="button" class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+      <div class="iv-page nt-page">
+        
+        <div class="nt-header">
+          <div class="nt-title-block">
+            <h1>Inbox Alerts</h1>
+            <p>Real-time venture creation, strategic AI milestones, and deal commitments.</p>
+          </div>
+          <div class="nt-actions">
+            <button class="nt-btn-action" id="btn-read-all" title="Mark all alerts as read">
+              <i class="fa-solid fa-check-double"></i> Mark all read
+            </button>
+            <button class="nt-btn-action" id="btn-refresh" title="Refresh feed">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="nt-list-container" id="nt-list-container">
+          <div id="nt-list">
+            <div style="text-align:center;padding:48px 0;color:var(--text-muted)">
+              <i class="fa-solid fa-circle-notch fa-spin" style="font-size:2rem;margin-bottom:12px;color:var(--accent)"></i>
+              <p>Fetching active project notifications stream...</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script>
+    var API = window.location.origin + '/api';
+    var uid = window._ivUserId || localStorage.getItem('ideavault_userId');
+    var tok = localStorage.getItem('ideavault_token') || '';
+
+    function esc(s) {
+      var d = document.createElement('div');
+      d.textContent = s == null ? '' : String(s);
+      return d.innerHTML;
+    }
+
+    function getBadge(type) {
+      switch (type) {
+        case 'idea_created':
+          return '<span class="nt-badge badge-idea"><i class="fa-solid fa-lightbulb"></i> Idea Published</span>';
+        case 'ai_summary':
+          return '<span class="nt-badge badge-ai-summary"><i class="fa-solid fa-robot"></i> AI Summary</span>';
+        case 'ai_analysis':
+          return '<span class="nt-badge badge-ai-analysis"><i class="fa-solid fa-chart-bar"></i> AI SWOT</span>';
+        case 'ai_roadmap':
+          return '<span class="nt-badge badge-ai-roadmap"><i class="fa-solid fa-map"></i> AI Roadmap</span>';
+        case 'vc':
+          return '<span class="nt-badge badge-vc"><i class="fa-solid fa-handshake"></i> VC Deal</span>';
+        default:
+          return '<span class="nt-badge badge-vc"><i class="fa-solid fa-bell"></i> System Alert</span>';
+      }
+    }
+
+    function loadNotifications() {
+      var root = document.getElementById('nt-list');
+      fetch(API + '/notifications/' + encodeURIComponent(uid), {
+        headers: { Authorization: 'Bearer ' + tok },
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error('Failed to load');
+          return r.json();
+        })
+        .then(function (items) {
+          if (!Array.isArray(items) || items.length === 0) {
+            root.innerHTML = `
+              <div class="nt-empty-state">
+                <i class="fa-solid fa-bell-slash"></i>
+                <h3>All Caught Up!</h3>
+                <p>No new updates or VC actions in the project pipeline yet.</p>
+              </div>
+            `;
+            return;
+          }
+
+          root.innerHTML = items
+            .map(function (n) {
+              var badgeHtml = getBadge(n.type);
+              var unreadDot = n.read ? '' : '<span class="unread-indicator"></span>';
+              var actionText = n.read ? '' : '<span class="nt-action-hint">Mark read <i class="fa-solid fa-arrow-right"></i></span>';
+              
+              return (
+                '<div class="nt-item' + (n.read ? '' : ' unread') + '" data-nt-id="' + esc(String(n._id)) + '">' +
+                  '<div class="nt-item-header">' +
+                    badgeHtml +
+                    '<div class="nt-time">' +
+                      '<i class="fa-regular fa-clock"></i> ' + esc(new Date(n.createdAt).toLocaleString()) +
+                      unreadDot +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="nt-body">' + esc(n.text || '') + '</div>' +
+                  '<div class="nt-item-footer">' +
+                    actionText +
+                  '</div>' +
+                '</div>'
+              );
+            })
+            .join('');
+
+          // Hook individual read actions
+          root.querySelectorAll('.nt-item.unread').forEach(function (el) {
+            el.addEventListener('click', function () {
+              var id = el.getAttribute('data-nt-id');
+              fetch(API + '/notifications/' + encodeURIComponent(id) + '/read', {
+                method: 'PATCH',
+                headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ read: true }),
+              }).then(function () {
+                el.classList.remove('unread');
+                var indicator = el.querySelector('.unread-indicator');
+                if (indicator) indicator.remove();
+                var hint = el.querySelector('.nt-action-hint');
+                if (hint) hint.remove();
+              });
+            });
+          });
+        })
+        .catch(function () {
+          root.innerHTML = `
+            <div class="nt-empty-state" style="color:var(--danger)">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <h3>Fetch Error</h3>
+              <p>Could not retrieve project notifications stream. Please ensure the backend is connected.</p>
+            </div>
+          `;
+        });
+    }
+
+    // Hook buttons
+    document.getElementById('btn-refresh').addEventListener('click', loadNotifications);
+
+    document.getElementById('btn-read-all').addEventListener('click', function () {
+      fetch(API + '/notifications/read-all/' + encodeURIComponent(uid), {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }
+      })
+      .then(function (r) {
+        if (!r.ok) throw new Error('Failed to mark all as read');
+        loadNotifications();
+      })
+      .catch(function (err) {
+        alert(err.message);
+      });
+    });
+
+    // Initial load
+    loadNotifications();
+  </script>
+</body>
+</html>

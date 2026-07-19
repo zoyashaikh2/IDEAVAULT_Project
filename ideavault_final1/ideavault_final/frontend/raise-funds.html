@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raise Funds — IdeaVault Venture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    .raise-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin-top: 24px;
+    }
+    @media(max-width: 992px) {
+      .raise-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .campaign-card {
+      padding: 30px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      margin-bottom: 24px;
+    }
+    .progress-section {
+      margin: 30px 0;
+    }
+    .progress-bar-bg {
+      background: rgba(255, 255, 255, 0.05);
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+      height: 100%;
+      transition: width 1s ease;
+      border-radius: 6px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .stat-item {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-item label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-item span {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .pledge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .pledge-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.92rem;
+    }
+    .pledge-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    .pledge-amt {
+      font-weight: 800;
+      color: var(--success);
+    }
+
+    /* Premium Escrow Checkout Modal */
+    .esc-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .esc-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .esc-modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      width: 100%;
+      max-width: 520px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .esc-overlay.active .esc-modal {
+      transform: translateY(0) scale(1);
+    }
+    .esc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .esc-header h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .esc-close {
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 1.2rem;
+      transition: color 0.2s;
+    }
+    .esc-close:hover {
+      color: var(--text);
+    }
+    .esc-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .esc-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      color: var(--text-muted, #94a3b8);
+    }
+    .esc-tab.active {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+      color: var(--accent) !important;
+    }
+    .esc-content-pane {
+      display: none;
+    }
+    .esc-content-pane.active {
+      display: block;
+    }
+    .esc-qr-wrapper {
+      text-align: center;
+      padding: 16px;
+      background: #fff;
+      border-radius: 20px;
+      display: inline-block;
+      margin: 0 auto 16px;
+    }
+    .esc-qr-wrapper img {
+      display: block;
+      width: 180px;
+      height: 180px;
+    }
+    .esc-bank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 16px;
+    }
+    .esc-bank-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+    }
+    .esc-bank-row label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .esc-bank-row span {
+      font-weight: 700;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+
+      <div class="iv-page">
+        <div id="no-idea-selected" class="campaign-card iv-glass" style="text-align: center; padding: 60px 20px;">
+          <i class="fa-solid fa-briefcase fa-3x" style="margin-bottom: 20px; color: var(--muted); opacity: 0.5;"></i>
+          <h2>No Startup Selected</h2>
+          <p class="iv-text-muted" style="margin-bottom: 20px;">Go to your dashboard and select "Raise Funds" from one of your active ideas.</p>
+          <a href="/dashboard.html" class="iv-btn iv-btn-primary">Go to Dashboard</a>
+        </div>
+
+        <div id="raise-content" style="display: none;">
+          <div style="margin-bottom: 24px;">
+            <h1 id="idea-title" style="margin: 0 0 6px; font-weight: 800;">Startup Name</h1>
+            <p id="idea-summary" style="margin: 0; color: var(--muted); font-size: 1.05rem;">Short description of the venture.</p>
+          </div>
+
+          <div class="raise-grid">
+            <div class="campaign-main">
+              <div class="campaign-card iv-glass">
+                <div class="progress-section">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 1rem; color: var(--text);">Funding Progress</span>
+                    <span id="progress-pct" style="font-weight: 800; color: var(--accent); font-size: 1.1rem;">0%</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div id="progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.92rem;">
+                    <span id="raised-amt" style="font-weight: 600; color: var(--success);">₹0 raised</span>
+                    <span id="target-amt" style="color: var(--muted);">Target: ₹0</span>
+                  </div>
+                </div>
+
+                <div class="stat-grid">
+                  <div class="stat-item">
+                    <label>Valuation</label>
+                    <span id="stat-valuation">₹0</span>
+                  </div>
+                  <div class="stat-item">
+                    <label>Equity</label>
+                    <span id="stat-equity">0%</span>
+                  </div>
+                  <div class="stat-item">
+                    <label>Min Ticket</label>
+                    <span id="stat-min">₹0</span>
+                  </div>
+                  <div class="stat-item">
+                    <label>Investors</label>
+                    <span id="stat-investors">0</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="campaign-card iv-glass">
+                <h3 style="margin: 0 0 16px; font-weight: 700;">Recent Pledges</h3>
+                <div id="pledge-list" class="pledge-list">
+                  <div style="color: var(--muted); text-align: center; padding: 20px;">
+                    No investments yet. Be the first to pledge capital!
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="campaign-side">
+              <div class="campaign-card iv-glass" id="round-setup-card">
+                <h3 style="margin: 0 0 8px; font-weight: 700;">Launch Funding Round</h3>
+                <p style="font-size: 0.85rem; color: var(--muted); margin: 0 0 20px;">Set Round criteria and attract commitments.</p>
+                
+                <div class="form-group">
+                  <label>Target Amount (INR - ₹)</label>
+                  <input type="number" id="round-target" placeholder="e.g. 50000000">
+                </div>
+                <div class="form-group">
+                  <label>Post-money Valuation (INR - ₹)</label>
+                  <input type="number" id="round-valuation" placeholder="e.g. 500000000">
+                </div>
+                <div class="form-group">
+                  <label>Equity Offered (%)</label>
+                  <input type="number" id="round-equity" placeholder="e.g. 10">
+                </div>
+                <div class="form-group">
+                  <label>Minimum Investment (INR - ₹)</label>
+                  <input type="number" id="round-min" placeholder="e.g. 100000">
+                </div>
+
+                <button class="iv-btn iv-btn-primary iv-btn-block" onclick="startRound()">Launch Round</button>
+              </div>
+
+              <div class="campaign-card iv-glass" id="investment-card" style="border: 1px solid rgba(99, 102, 241, 0.3);">
+                <h3 style="margin: 0 0 8px; font-weight: 700; color: var(--accent-blue);">Pledge Capital</h3>
+                <p style="font-size: 0.85rem; color: var(--muted); margin: 0 0 20px;">Back this venture with a secure test investment in Indian Rupees (₹).</p>
+                <div class="form-group">
+                  <label>Investment Amount (INR - ₹)</label>
+                  <input type="number" id="invest-amt" placeholder="e.g. 500000">
+                </div>
+                <button class="iv-btn iv-btn-accent iv-btn-block" style="background: linear-gradient(90deg, var(--accent-blue), var(--accent)); color: #fff;" onclick="initiateInvestment()">Pledge Funds</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Escrow Checkout Modal Overlay -->
+        <div class="esc-overlay" id="esc-checkout-modal">
+          <div class="esc-modal">
+            <div class="esc-header">
+              <h3>Secure Escrow Checkout</h3>
+              <span class="esc-close" onclick="closeEscrowModal()"><i class="fa-solid fa-xmark"></i></span>
+            </div>
+            
+            <div class="esc-tabs">
+              <div class="esc-tab active" id="tab-btn-manual" onclick="switchEscrowTab('manual')">
+                <i class="fa-solid fa-building-columns" style="font-size:1.1rem;margin-bottom:2px;"></i>
+                <span>Jio Bank Transfer & QR</span>
+              </div>
+              <div class="esc-tab" id="tab-btn-card" onclick="switchEscrowTab('card')">
+                <i class="fa-solid fa-credit-card" style="font-size:1.1rem;margin-bottom:2px;"></i>
+                <span>Jio Pay Card</span>
+              </div>
+              <div class="esc-tab" id="tab-btn-razorpay" onclick="switchEscrowTab('razorpay')">
+                <i class="fa-solid fa-shield-halved" style="font-size:1.1rem;margin-bottom:2px;"></i>
+                <span>Razorpay Secure</span>
+              </div>
+            </div>
+
+            <!-- Manual UPI/Bank Transfer Panel -->
+            <div class="esc-content-pane active" id="pane-manual">
+              <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 16px;line-height:1.5;text-align:center;">
+                Scan QR with any UPI app (JioPay, GPay, Paytm) or complete bank transfer below to confirm pledge instantly.
+              </p>
+              
+              <div style="text-align:center;">
+                <div class="esc-qr-wrapper">
+                  <!-- Real UPI QR Code Prefilled with dynamic INR details -->
+                  <img id="esc-upi-qr" src="" alt="Jio Bank Escrow QR" />
+                </div>
+              </div>
+
+              <div class="esc-bank-list">
+                <div class="esc-bank-row">
+                  <label>Payee Name</label>
+                  <span>IdeaVault Escrow (Jio Bank)</span>
+                </div>
+                <div class="esc-bank-row">
+                  <label>Jio Bank Account</label>
+                  <span style="font-family:monospace;letter-spacing:0.5px;font-weight:700;">001621711161642</span>
+                </div>
+                <div class="esc-bank-row">
+                  <label>IFSC Code</label>
+                  <span style="font-family:monospace;font-weight:700;">JIOP0000001</span>
+                </div>
+                <div class="esc-bank-row">
+                  <label>Unique ID</label>
+                  <span>90916573</span>
+                </div>
+                <div class="esc-bank-row" style="border-top:1px dashed var(--border);padding-top:8px;margin-top:4px;">
+                  <label style="color:var(--accent);font-weight:700;">Price Summary</label>
+                  <span id="esc-inr-cheque" style="color:var(--accent);font-weight:800;font-size:1.1rem;">₹0</span>
+                </div>
+              </div>
+
+              <button class="iv-btn iv-btn-success iv-btn-block" style="background:#10b981;color:#fff;border-color:#10b981;" id="btn-confirm-manual" onclick="confirmManualPayment()">
+                <i class="fa-solid fa-circle-check"></i> I have paid — Confirm Pledge
+              </button>
+            </div>
+
+            <!-- Jio Pay Card Panel -->
+            <div class="esc-content-pane" id="pane-card">
+              <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 16px;line-height:1.5;">
+                Authorized Jio Bank Escrow card gateway. Your details are preloaded for fast verification.
+              </p>
+              
+              <div class="esc-bank-list" style="background:linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));border-color:var(--accent);">
+                <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700;">Jio Bank Escrow Card</div>
+                <div style="font-size:1.25rem;font-weight:800;letter-spacing:2px;font-family:monospace;margin-bottom:12px;color:var(--text);">8177 0401 0142 9484</div>
+                <div style="display:flex;justify-content:space-between;font-size:0.82rem;">
+                  <div>
+                    <label style="font-size:0.65rem;color:var(--muted);display:block;text-transform:uppercase;">Expiry</label>
+                    <span style="font-family:monospace;font-weight:700;">08/29</span>
+                  </div>
+                  <div>
+                    <label style="font-size:0.65rem;color:var(--muted);display:block;text-transform:uppercase;">CVV</label>
+                    <span style="font-family:monospace;font-weight:700;">106</span>
+                  </div>
+                  <div>
+                    <label style="font-size:0.65rem;color:var(--muted);display:block;text-transform:uppercase;">Cardholder</label>
+                    <span style="font-weight:700;">IdeaVault Backer</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="esc-bank-list">
+                <div class="esc-bank-row">
+                  <label style="color:var(--accent);font-weight:700;">Price Summary</label>
+                  <span class="esc-card-inr-summary" style="color:var(--accent);font-weight:800;font-size:1.1rem;">₹0</span>
+                </div>
+              </div>
+
+              <button class="iv-btn iv-btn-primary iv-btn-block" id="btn-confirm-card" onclick="confirmCardPayment()">
+                <i class="fa-solid fa-credit-card"></i> Pay via Secure Jio Card
+              </button>
+            </div>
+
+            <!-- Razorpay Gateway Panel -->
+            <div class="esc-content-pane" id="pane-razorpay">
+              <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 20px;line-height:1.5;">
+                Pledge capital directly via the Razorpay payment checkout system. Requires merchant profile activation.
+              </p>
+              <div style="text-align:center;margin-bottom:24px;">
+                <i class="fa-solid fa-shield-halved fa-3x" style="color:var(--accent);margin-bottom:12px;opacity:0.8;"></i>
+                <div style="font-weight:700;font-size:1rem;color:var(--text);">Verified Escrow Shield Enabled</div>
+              </div>
+              <button class="iv-btn iv-btn-primary iv-btn-block" id="btn-run-razorpay" onclick="executeRazorpayPayment()">
+                <i class="fa-solid fa-lock"></i> Proceed to Razorpay Checkout
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script>
+    const ideaId = new URLSearchParams(window.location.search).get('ideaId');
+    let currentIdea = null;
+    let razorpayKeyId = 'rzp_test_fake_id';
+    let usdToInrRate = 83;
+
+    const API = (window.location.origin && window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:5000') + '/api';
+
+    async function fetchConfig() {
+      try {
+        const res = await fetch(API + '/config');
+        const data = await res.json();
+        if (data) {
+          if (data.razorpayKeyId) razorpayKeyId = data.razorpayKeyId;
+          if (data.usdToInr) usdToInrRate = data.usdToInr;
+        }
+      } catch (e) {
+        console.error('Error fetching Razorpay config:', e);
+      }
+    }
+
+    async function loadCampaign() {
+      if (!ideaId) return;
+      await fetchConfig();
+      if (ideaId === 'mock_idea_1') {
+        currentIdea = {
+          _id: 'mock_idea_1',
+          title: 'resumeIQ - AI Resume Builder',
+          summary: 'An ATS-optimized AI resume builder that helps candidates craft perfect resumes.',
+          fundraising: {
+            goalUsd: 100000,
+            raisedUsd: 25000,
+            minInvestmentUsd: 5000,
+            valuationUsd: 2000000,
+            equityOfferPct: 5,
+            status: 'Active'
+          }
+        };
+        document.getElementById('no-idea-selected').style.display = 'none';
+        document.getElementById('raise-content').style.display = 'block';
+        updateUI(currentIdea);
+        loadPledges();
+        return;
+      }
+      try {
+        const res = await fetch(API + '/ideas/' + ideaId, {
+          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('ideavault_token') }
+        });
+        const data = await res.json();
+        if (data && !data.error) {
+          currentIdea = data;
+          document.getElementById('no-idea-selected').style.display = 'none';
+          document.getElementById('raise-content').style.display = 'block';
+          updateUI(data);
+          loadPledges();
+        }
+      } catch (e) { 
+        console.error(e); 
+      }
+    }
+
+    function inrFmt(n) { return '₹' + (Number(n)||0).toLocaleString('en-IN'); }
+
+    function updateUI(idea) {
+      document.getElementById('idea-title').textContent = idea.title;
+      document.getElementById('idea-summary').textContent = idea.summary || idea.aiSummary || 'No summary available.';
+      
+      // All values stored natively in INR
+      const f = idea.fundraising || { goalUsd: 0, raisedUsd: 0 };
+      const goalInr      = Math.round(f.goalUsd || 0);
+      const raisedInr    = Math.round(f.raisedUsd || 0);
+      const valuationInr = Math.round(f.valuationUsd || 0);
+      const minInr       = Math.round(f.minInvestmentUsd || 0);
+      const pct = goalInr > 0 ? Math.min(100, Math.round((raisedInr / goalInr) * 100)) : 0;
+
+      document.getElementById('progress-pct').textContent = pct + '%';
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('raised-amt').textContent = inrFmt(raisedInr) + ' Raised';
+      document.getElementById('target-amt').textContent = 'Target: ' + inrFmt(goalInr);
+      document.getElementById('stat-valuation').textContent = inrFmt(valuationInr);
+      document.getElementById('stat-equity').textContent = (f.equityOffered || 0) + '%';
+      document.getElementById('stat-min').textContent = inrFmt(minInr);
+      document.getElementById('stat-investors').textContent = String(f.investorCount || 0);
+      
+      const currentUserId = localStorage.getItem('ideavault_userId');
+      const isOwner = String(idea.userId) === String(currentUserId);
+      const roundSetup = document.getElementById('round-setup-card');
+      if (isOwner) {
+        roundSetup.style.display = 'block';
+        if (goalInr > 0) {
+          roundSetup.innerHTML = `
+            <h3 style="margin:0 0 8px;font-weight:700;color:var(--success)"><i class="fa-solid fa-circle-check"></i> Round Active</h3>
+            <p style="font-size:.85rem;color:var(--muted);margin:0 0 16px">Accepting pledges. <a href="/funding.html" style="color:var(--accent)">View full funding dashboard →</a></p>
+            <div style="font-size:.88rem;padding:12px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:16px">
+              <strong>Target:</strong> ${inrFmt(goalInr)}<br>
+              <strong>Raised:</strong> ${inrFmt(raisedInr)} (${pct}%)<br>
+              <strong>Valuation:</strong> ${inrFmt(valuationInr)}<br>
+              <strong>Equity Offered:</strong> ${f.equityOffered||0}%<br>
+              <strong>Min Investment:</strong> ${inrFmt(minInr)}
+            </div>
+            <button class="iv-btn iv-btn-secondary iv-btn-block" onclick="enableRoundEdits()" style="border:1px solid var(--border);background:transparent;color:var(--text)">
+              <i class="fa-solid fa-pen-to-square"></i> Adjust Round
+            </button>`;
+        }
+      } else {
+        roundSetup.style.display = 'none';
+      }
+      document.getElementById('investment-card').style.display = goalInr > 0 ? 'block' : 'none';
+    }
+
+    async function loadPledges() {
+      try {
+        const res = await fetch(API + '/ideas/' + ideaId + '/transactions');
+        const transactions = await res.json();
+        const pledgeList = document.getElementById('pledge-list');
+        if (transactions && transactions.length > 0) {
+          pledgeList.innerHTML = '';
+          transactions.forEach(tx => {
+            if (tx.status === 'Success') {
+              const item = document.createElement('div');
+              item.className = 'pledge-item';
+              
+              const txAmtInr = tx.amountInr || Math.round(tx.amountUsd * USD_TO_INR);
+              
+              item.innerHTML = `
+                <div class="pledge-user">
+                  <i class="fa-solid fa-user-tie" style="color: var(--accent);"></i>
+                  <span>${tx.userId?.name || 'Investor'}</span>
+                </div>
+                <div class="pledge-amt">+₹${txAmtInr.toLocaleString('en-IN')}</div>
+              `;
+              pledgeList.appendChild(item);
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Error loading pledges:', e);
+      }
+    }
+
+    async function startRound() {
+      const target = Number(document.getElementById('round-target').value);
+      const val    = Number(document.getElementById('round-valuation').value);
+      const eq     = Number(document.getElementById('round-equity').value);
+      const min    = Number(document.getElementById('round-min').value);
+      if (!target || !val || !eq || !min) {
+        return window.ivToast ? window.ivToast('Please fill out all round parameters', 'error') : alert('Please fill out all round parameters');
+      }
+      // Send native INR values directly
+      const body = { ideaId, targetAmountUsd: target, valuationUsd: val, equityOffered: eq, minInvestmentUsd: min };
+      try {
+        const res = await fetch(API + '/fundraising/round', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('ideavault_token') },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.error) { window.ivToast ? window.ivToast(data.error, 'error') : alert(data.error); }
+        else { window.ivToast ? window.ivToast('Funding round launched! 🚀', 'success') : alert('Round launched!'); loadCampaign(); }
+      } catch (e) { console.error(e); }
+    }
+
+    // Escrow Checkout Modal Operations
+    let selectedPledgeAmt = 0;
+
+    function closeEscrowModal() {
+      document.getElementById('esc-checkout-modal').classList.remove('active');
+    }
+
+    function switchEscrowTab(mode) {
+      // Tabs
+      document.getElementById('tab-btn-manual').classList.toggle('active', mode === 'manual');
+      document.getElementById('tab-btn-card').classList.toggle('active', mode === 'card');
+      document.getElementById('tab-btn-razorpay').classList.toggle('active', mode === 'razorpay');
+      
+      // Panes
+      document.getElementById('pane-manual').classList.toggle('active', mode === 'manual');
+      document.getElementById('pane-card').classList.toggle('active', mode === 'card');
+      document.getElementById('pane-razorpay').classList.toggle('active', mode === 'razorpay');
+    }
+
+    async function initiateInvestment() {
+      const amt = Number(document.getElementById('invest-amt').value);
+      if (!amt || amt <= 0) {
+        return window.ivToast ? window.ivToast('Please enter a valid pledge amount in ₹', 'error') : alert('Please enter a pledge amount');
+      }
+      if (!currentIdea) {
+        return window.ivToast ? window.ivToast('Idea not loaded yet. Please wait.', 'error') : alert('Idea not loaded');
+      }
+
+      // minInvestmentUsd field stores native INR (new backend saves INR directly)
+      const f = currentIdea.fundraising || {};
+      const minInr = Math.round(f.minInvestmentUsd || 0);
+      if (minInr > 0 && amt < minInr) {
+        return window.ivToast ? window.ivToast(`Minimum investment is ${inrFmt(minInr)}`, 'error') : alert(`Minimum investment is ${inrFmt(minInr)}`);
+      }
+
+      selectedPledgeAmt = amt;
+
+      // Generate Razorpay UPI QR for the exact INR amount
+      const ideaTitle = currentIdea.title || 'Venture';
+      const upiString = `upi://pay?pa=90916573@jio&pn=IdeaVault%20Escrow&am=${amt}&cu=INR&tn=Pledge%20for%20${encodeURIComponent(ideaTitle.substring(0, 20))}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
+      document.getElementById('esc-upi-qr').src = qrUrl;
+      document.getElementById('esc-inr-cheque').textContent = inrFmt(amt);
+      document.querySelectorAll('.esc-card-inr-summary').forEach(el => { el.textContent = inrFmt(amt); });
+
+      switchEscrowTab('manual');
+      document.getElementById('esc-checkout-modal').classList.add('active');
+    }
+
+    async function confirmCardPayment() {
+      const amt = selectedPledgeAmt;
+      const btn = document.getElementById('btn-confirm-card');
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authorizing...';
+      try {
+        const res = await fetch(API + '/payments/manual-confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('ideavault_token') },
+          body: JSON.stringify({ amountUsd: amt, ideaId })
+        });
+        const data = await res.json();
+        btn.disabled = false; btn.innerHTML = orig;
+        if (data.error) return window.ivToast ? window.ivToast(data.error,'error') : alert(data.error);
+        closeEscrowModal();
+        window.ivToast ? window.ivToast('Payment of ₹'+amt.toLocaleString('en-IN')+' confirmed! 💳','success') : alert('Payment confirmed!');
+        loadCampaign();
+      } catch (e) { console.error(e); btn.disabled=false; btn.innerHTML=orig; }
+    }
+
+    async function executeRazorpayPayment() {
+      const amt = selectedPledgeAmt;
+      const btn = document.getElementById('btn-run-razorpay');
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Preparing Checkout...';
+      try {
+        // Send native INR — backend creates order in paise
+        const res = await fetch(API + '/payments/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('ideavault_token') },
+          body: JSON.stringify({ amountUsd: amt, ideaId })
+        });
+        const orderData = await res.json();
+        if (orderData.error) { btn.disabled=false; btn.innerHTML=orig; return window.ivToast ? window.ivToast(orderData.error,'error') : alert(orderData.error); }
+        const options = {
+          key: razorpayKeyId,
+          amount: orderData.amount,
+          currency: orderData.currency || 'INR',
+          name: 'IdeaVault Venture',
+          description: 'Pledge for ' + (currentIdea ? currentIdea.title : 'Venture'),
+          order_id: orderData.orderId,
+          handler: async function(response) {
+            try {
+              const vRes = await fetch(API + '/payments/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(response) });
+              const vData = await vRes.json();
+              if (vData.status === 'success') {
+                closeEscrowModal();
+                window.ivToast ? window.ivToast('✅ Investment successful! '+inrFmt(amt)+' pledged.','success') : alert('Investment successful!');
+                loadCampaign();
+              } else { window.ivToast ? window.ivToast('Payment verification failed.','error') : alert('Verification failed.'); }
+            } catch(err) { console.error(err); }
+          },
+          modal: { ondismiss: function(){ btn.disabled=false; btn.innerHTML=orig; } },
+          theme: { color: '#6366F1' },
+          prefill: { name: localStorage.getItem('ideavault_name') || 'Investor' }
+        };
+        new Razorpay(options).open();
+      } catch(e) { console.error(e); btn.disabled=false; btn.innerHTML=orig; }
+    }
+
+    async function confirmManualPayment() {
+      const amt = selectedPledgeAmt;
+      const btn = document.getElementById('btn-confirm-manual');
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Writing to Ledger...';
+      try {
+        const res = await fetch(API + '/payments/manual-confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('ideavault_token') },
+          body: JSON.stringify({ amountUsd: amt, ideaId })
+        });
+        const data = await res.json();
+        btn.disabled = false; btn.innerHTML = orig;
+        if (data.error) return window.ivToast ? window.ivToast(data.error,'error') : alert(data.error);
+        closeEscrowModal();
+        window.ivToast ? window.ivToast('Pledge of ₹'+amt.toLocaleString('en-IN')+' committed to ledger! ✅','success') : alert('Pledge confirmed!');
+        loadCampaign();
+      } catch (e) { console.error(e); btn.disabled=false; btn.innerHTML=orig; }
+    }
+
+    function enableRoundEdits() {
+      const f = currentIdea.fundraising || {};
+      // All values stored natively as INR
+      const goalInr     = Math.round(f.goalUsd || 0);
+      const valuationInr= Math.round(f.valuationUsd || 0);
+      const minInr      = Math.round(f.minInvestmentUsd || 0);
+      const equity      = f.equityOffered || 0;
+      document.getElementById('round-setup-card').innerHTML = `
+        <h3 style="margin:0 0 8px;font-weight:700">Adjust Funding Round</h3>
+        <p style="font-size:.85rem;color:var(--muted);margin:0 0 20px">Update round parameters. Current raised: <strong>${inrFmt(Math.round(f.raisedUsd||0))}</strong></p>
+        <div class="form-group">
+          <label>Target Amount (₹ INR)</label>
+          <input type="number" id="round-target" value="${goalInr}" placeholder="e.g. 5000000">
+        </div>
+        <div class="form-group">
+          <label>Post-money Valuation (₹ INR)</label>
+          <input type="number" id="round-valuation" value="${valuationInr}" placeholder="e.g. 50000000">
+        </div>
+        <div class="form-group">
+          <label>Equity Offered (%)</label>
+          <input type="number" id="round-equity" value="${equity}" placeholder="e.g. 10">
+        </div>
+        <div class="form-group">
+          <label>Minimum Investment (₹ INR)</label>
+          <input type="number" id="round-min" value="${minInr}" placeholder="e.g. 100000">
+        </div>
+        <button class="iv-btn iv-btn-primary iv-btn-block" onclick="startRound()">💾 Save & Update Round</button>
+        <button class="iv-btn iv-btn-secondary iv-btn-block" style="margin-top:8px;background:transparent;border:1px solid var(--border)" onclick="loadCampaign()">Cancel</button>
+      `;
+    }
+
+    window.onload = loadCampaign;
+  </script>
+</body>
+</html>

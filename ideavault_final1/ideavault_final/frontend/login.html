@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/login.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-blobs" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <main class="auth-wrap">
+    <div class="auth-card card">
+      <div class="auth-logo">
+        <div class="auth-logo-ring">
+          <img src="/assets/logo.png" alt="IdeaVault" class="auth-logo-img" width="56" height="56" />
+        </div>
+        <h1 class="auth-brand">IdeaVault</h1>
+        <p class="auth-tagline">Where Ideas Take Shape</p>
+      </div>
+
+      <div id="msg" class="auth-msg" role="status"></div>
+
+      <div id="panel-magic" class="auth-panel">
+        <label class="iv-label" for="magic-email">Email</label>
+        <input id="magic-email" class="iv-input" type="email" autocomplete="email" placeholder="you@example.com" />
+        <button type="button" id="btn-magic" class="iv-btn iv-btn-primary iv-btn-block">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Send Magic Link
+        </button>
+      </div>
+
+      <div id="panel-pass" class="auth-panel" hidden>
+        <label class="iv-label" for="pass-email">Email</label>
+        <input id="pass-email" class="iv-input" type="email" autocomplete="email" placeholder="you@example.com" />
+        <label class="iv-label" for="pass-password">Password</label>
+        <input id="pass-password" class="iv-input" type="password" autocomplete="current-password" placeholder="••••••••" />
+        <button type="button" id="btn-login" class="iv-btn iv-btn-primary iv-btn-block">
+          <i class="fa-solid fa-right-to-bracket"></i> Login
+        </button>
+      </div>
+
+      <p class="auth-toggle">
+        <button type="button" id="toggle-mode" class="link-btn">Use Password Instead</button>
+      </p>
+      <p class="auth-footer">
+        New here? <a href="/register.html">Create an account</a>
+      </p>
+    </div>
+  </main>
+  <script src="/theme.js"></script>
+  <script src="/login.js"></script>
+</body>
+</html>

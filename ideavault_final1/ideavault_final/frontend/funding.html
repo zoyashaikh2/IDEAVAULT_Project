@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Funding & Investments — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="/components.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .fund-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    @media(max-width:900px){.fund-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:500px){.fund-kpi-grid{grid-template-columns:1fr}}
+    .kpi-card{padding:20px 18px;border-radius:18px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);backdrop-filter:blur(10px);transition:transform .2s}
+    .kpi-card:hover{transform:translateY(-2px)}
+    .kpi-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+    .kpi-value{font-size:1.7rem;font-weight:800;color:var(--text);margin-top:6px;line-height:1}
+    .kpi-sub{font-size:.75rem;color:var(--muted);margin-top:4px}
+    .section-card{background:var(--card,#fff);border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:22px}
+    [data-theme=dark] .section-card{background:rgba(15,23,42,.6)}
+    .prog-bar{height:10px;background:rgba(99,102,241,.15);border-radius:5px;overflow:hidden;margin:8px 0 4px}
+    .prog-fill{height:100%;background:linear-gradient(90deg,#6366f1,#38bdf8);border-radius:5px;transition:width .8s ease}
+    .txn-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:8px;font-size:.88rem}
+    .txn-amt{font-weight:800;color:#10b981}
+    .txn-amt.out{color:#f43f5e}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.04em}
+    .badge-success{background:rgba(16,185,129,.15);color:#10b981}
+    .badge-pending{background:rgba(245,158,11,.15);color:#f59e0b}
+    .badge-invested{background:rgba(99,102,241,.15);color:#6366f1}
+    .badge-interested{background:rgba(56,189,248,.15);color:#38bdf8}
+    .badge-rejected{background:rgba(244,63,94,.15);color:#f43f5e}
+    .vc-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;border:1px solid var(--border);margin-bottom:8px;font-size:.84rem}
+    @media(max-width:700px){.vc-row{grid-template-columns:1fr 1fr}}
+    .ml-bar-wrap{background:rgba(255,255,255,.05);border-radius:4px;height:6px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle}
+    .ml-bar-inner{height:100%;background:linear-gradient(90deg,#6366f1,#38bdf8);border-radius:4px}
+    .hero-banner{padding:24px 22px;border-radius:20px;background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(49,46,129,.9));border:1px solid rgba(148,163,184,.2);margin-bottom:22px;color:#e2e8f0}
+    .hero-banner h1{margin:0 0 6px;font-size:1.6rem;font-weight:800;background:linear-gradient(90deg,#a5b4fc,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .hero-banner p{margin:0;font-size:.9rem;color:#94a3b8}
+    .tab-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+    .tab-btn{padding:8px 18px;border-radius:30px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:.84rem;font-weight:600;transition:all .2s;font-family:inherit}
+    .tab-btn.active{background:linear-gradient(90deg,#6366f1,#38bdf8);color:#fff;border-color:transparent}
+    .chart-wrap{position:relative;height:200px}
+    .empty-state{text-align:center;padding:30px 20px;color:var(--muted);font-size:.9rem}
+    .idea-fund-card{padding:16px;border-radius:14px;border:1px solid var(--border);margin-bottom:12px;background:rgba(255,255,255,.02)}
+    .insight-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:.78rem;font-weight:600;background:rgba(99,102,241,.1);color:#a5b4fc;margin:4px}
+  </style>
+</head>
+<body class="iv-app">
+<div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+<div class="iv-layout">
+  <div class="iv-sidebar-slot" id="sidebar-container"></div>
+  <div class="iv-main">
+    <header class="iv-topnav">
+      <div class="iv-topnav-left">
+        <button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+      </div>
+      <div class="iv-greet" data-top-greet>💰 Funding</div>
+      <div class="iv-topnav-actions">
+        <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+        <a class="iv-icon-btn" data-top-profile href="/profile.html"><i class="fa-solid fa-user"></i></a>
+        <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+      </div>
+    </header>
+
+    <div class="iv-page" style="max-width:1100px">
+      <div class="hero-banner">
+        <h1><i class="fa-solid fa-coins"></i> Funding Intelligence Hub</h1>
+        <p>Real-time investment tracking, payment history, ML-powered VC insights, and fundraising progress — all in one place.</p>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="fund-kpi-grid" id="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Total Raised (Founder)</div><strong class="kpi-value" id="kpi-raised">—</strong><div class="kpi-sub">₹ received in pledges</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total Invested (VC)</div><strong class="kpi-value" id="kpi-invested">—</strong><div class="kpi-sub">₹ committed to ideas</div></div>
+        <div class="kpi-card"><div class="kpi-label">VC Pipeline Value</div><strong class="kpi-value" id="kpi-vc">—</strong><div class="kpi-sub">₹ in Invested stage</div></div>
+        <div class="kpi-card"><div class="kpi-label">Active Rounds</div><strong class="kpi-value" id="kpi-rounds">—</strong><div class="kpi-sub">open funding rounds</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div class="tab-row" style="margin:0">
+          <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+          <button class="tab-btn" onclick="showTab('rounds')">My Rounds</button>
+          <button class="tab-btn" onclick="showTab('received')">Received</button>
+          <button class="tab-btn" onclick="showTab('invested')">Invested</button>
+          <button class="tab-btn" onclick="showTab('vc')">VC Pipeline</button>
+          <button class="tab-btn" onclick="showTab('roi')">ROI History</button>
+          <button class="tab-btn" onclick="showTab('insights')">ML Insights</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:.78rem;color:var(--muted)">View:</span>
+          <button class="tab-btn active" id="view-30" onclick="setView(30)">30 Days</button>
+          <button class="tab-btn" id="view-1" onclick="setView(1)">Today</button>
+        </div>
+      </div>
+
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-chart-area" style="color:var(--accent)"></i> Money Flow <span id="chart-period-label" style="font-size:.78rem;color:var(--muted);font-weight:400">— 30 days</span></h3>
+          <div class="chart-wrap"><canvas id="chart-timeline"></canvas></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <div class="section-card">
+            <h3 style="margin:0 0 14px;font-size:1rem;font-weight:700"><i class="fa-solid fa-rocket" style="color:#10b981"></i> Fundraising Progress</h3>
+            <div id="overview-rounds"><div class="empty-state">No active rounds.</div></div>
+          </div>
+          <div class="section-card">
+            <h3 style="margin:0 0 14px;font-size:1rem;font-weight:700"><i class="fa-solid fa-brain" style="color:#a5b4fc"></i> Today's Activity</h3>
+            <div id="today-summary"><div class="empty-state">Loading today's data...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROUNDS TAB -->
+      <div id="tab-rounds" style="display:none">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-flag" style="color:var(--accent)"></i> Your Funding Rounds</h3>
+          <p style="font-size:.83rem;color:var(--muted);margin:0 0 16px">Active fundraising campaigns for your ideas.</p>
+          <div id="rounds-list"><div class="empty-state">No rounds yet. Go to an idea → Raise Funds.</div></div>
+        </div>
+      </div>
+
+      <!-- RECEIVED PAYMENTS TAB -->
+      <div id="tab-received" style="display:none">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-arrow-down-to-bracket" style="color:#10b981"></i> Payments Received</h3>
+          <p style="font-size:.83rem;color:var(--muted);margin:0 0 16px">Capital pledged to your ideas by investors.</p>
+          <div id="received-list"><div class="empty-state">No payments received yet.</div></div>
+        </div>
+      </div>
+
+      <!-- MY INVESTMENTS TAB -->
+      <div id="tab-invested" style="display:none">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-arrow-up-from-bracket" style="color:#6366f1"></i> My Investment History</h3>
+          <div id="invested-list"><div class="empty-state">No investments made yet.</div></div>
+        </div>
+      </div>
+
+      <!-- VC PIPELINE TAB -->
+      <div id="tab-vc" style="display:none">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-list-check" style="color:#38bdf8"></i> VC Deal Pipeline</h3>
+          <p style="font-size:.83rem;color:var(--muted);margin:0 0 16px">All your virtual deal pipeline rows with ML predictions.</p>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+              <thead><tr style="border-bottom:2px solid var(--border)">
+                <th style="padding:10px 12px;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Idea</th>
+                <th style="padding:10px 12px;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Status</th>
+                <th style="padding:10px 12px;text-align:right;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Cheque (₹)</th>
+                <th style="padding:10px 12px;text-align:right;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Equity %</th>
+                <th style="padding:10px 12px;text-align:right;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Valuation (₹)</th>
+                <th style="padding:10px 12px;text-align:center;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">ML Score</th>
+              </tr></thead>
+              <tbody id="vc-table-body"><tr><td colspan="6" class="empty-state">No pipeline deals yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROI HISTORY TAB -->
+      <div id="tab-roi" style="display:none">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-calculator" style="color:#f59e0b"></i> ROI Simulation History</h3>
+          <p style="font-size:.83rem;color:var(--muted);margin:0 0 16px">Last 20 ROI simulations run from the VC Desk — saved to MongoDB.</p>
+          <div id="roi-history-list"><div class="empty-state">No simulations yet. Run one from <a href="/vc-dashboard.html" style="color:var(--accent)">VC Desk</a>.</div></div>
+        </div>
+      </div>
+
+      <!-- ML INSIGHTS TAB -->
+      <div id="tab-insights" style="display:none">
+        <div class="section-card">
+          <h3 style="margin:0 0 6px;font-size:1rem;font-weight:700"><i class="fa-solid fa-microchip" style="color:#a5b4fc"></i> ML Investment Intelligence</h3>
+          <p style="font-size:.83rem;color:var(--muted);margin:0 0 18px">Logistic-regression success probability per deal.</p>
+          <div id="insights-list"><div class="empty-state">No ML data yet.</div></div>
+        </div>
+        <div class="section-card">
+          <h3 style="margin:0 0 14px;font-size:1rem;font-weight:700"><i class="fa-solid fa-chart-pie" style="color:#f59e0b"></i> Portfolio Distribution</h3>
+          <div class="chart-wrap"><canvas id="chart-dist"></canvas></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/theme.js"></script>
+<script src="/sidebar.js"></script>
+<script src="/auth-guard.js"></script>
+<script>
+const API = (window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:5000') + '/api';
+const tok = localStorage.getItem('ideavault_token') || '';
+const uid = localStorage.getItem('ideavault_userId') || '';
+
+function fmt(n){ return '₹'+(Number(n)||0).toLocaleString('en-IN',{maximumFractionDigits:0}); }
+function esc(s){ const d=document.createElement('div'); d.textContent=s==null?'':String(s); return d.innerHTML; }
+function badgeHtml(st){
+  const m={Success:'badge-success',Pending:'badge-pending',Invested:'badge-invested',
+    Interested:'badge-interested',Rejected:'badge-rejected',DueDiligence:'badge-invested',
+    PitchScheduled:'badge-interested',Bookmarked:'badge-pending',Funded:'badge-success'};
+  return `<span class="badge ${m[st]||'badge-pending'}">${esc(st)}</span>`;
+}
+
+let timelineChart=null, distChart=null, currentView=30;
+
+function showTab(name){
+  const tabs=['overview','rounds','received','invested','vc','roi','insights'];
+  tabs.forEach(t=>{ document.getElementById('tab-'+t).style.display = t===name?'':'none'; });
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active', tabs.includes(b.textContent.trim().toLowerCase().replace(' ',''))
+      ? b.getAttribute('onclick')===`showTab('${name}')` : b.classList.contains('active'));
+  });
+  // Simpler: just match onclick
+  document.querySelectorAll('.tab-btn[onclick^="showTab"]').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('onclick')===`showTab('${name}')`);
+  });
+}
+
+function setView(days){
+  currentView = days;
+  document.getElementById('view-30').classList.toggle('active', days===30);
+  document.getElementById('view-1').classList.toggle('active', days===1);
+  document.getElementById('chart-period-label').textContent = days===1 ? '— Today' : '— 30 days';
+  loadData();
+}
+
+async function runMigration(){
+  // Auto-migrate old USD fundraising data once
+  if(localStorage.getItem('iv_migration_done')) return;
+  try{
+    await fetch(`${API}/admin/migrate-fundraising-inr`,{method:'POST'});
+    localStorage.setItem('iv_migration_done','1');
+  }catch(e){}
+}
+
+async function loadData(){
+  if(!uid||!tok) return;
+  await runMigration();
+
+  try{
+    const [mainRes, todayRes, roiRes] = await Promise.all([
+      fetch(`${API}/funding/analytics/${uid}`,{headers:{Authorization:'Bearer '+tok}}),
+      fetch(`${API}/funding/today/${uid}`,{headers:{Authorization:'Bearer '+tok}}),
+      fetch(`${API}/vc/roi-history`,{headers:{Authorization:'Bearer '+tok}})
+    ]);
+    const d = await mainRes.json();
+    const today = await todayRes.json().catch(()=>({}));
+    const roiHistory = await roiRes.json().catch(()=>[]);
+    if(d.error){ console.error(d.error); return; }
+
+    // KPIs
+    document.getElementById('kpi-raised').textContent    = fmt(d.totalRaised||0);
+    document.getElementById('kpi-invested').textContent  = fmt(d.totalInvested||0);
+    document.getElementById('kpi-vc').textContent        = fmt(d.totalVcCommitted||0);
+    document.getElementById('kpi-rounds').textContent    = String((d.ideaFundingStatus||[]).length);
+
+    // Today summary
+    const todayEl = document.getElementById('today-summary');
+    if(today && (today.totalReceivedToday>0 || today.totalSentToday>0 || today.vcDealsToday>0)){
+      todayEl.innerHTML=`
+        <div class="txn-row" style="margin-bottom:8px"><span>💰 Received today</span><span class="txn-amt">+${fmt(today.totalReceivedToday)}</span></div>
+        <div class="txn-row" style="margin-bottom:8px"><span>📤 Invested today</span><span class="txn-amt out">-${fmt(today.totalSentToday)}</span></div>
+        <div class="txn-row"><span>🤝 VC deals updated</span><span style="font-weight:700">${today.vcDealsToday}</span></div>
+        ${(today.receivedToday||[]).map(t=>`<div class="txn-row" style="margin-top:8px"><span style="font-size:.8rem">${esc((t.userId&&t.userId.name)||'Investor')} → ${esc((t.ideaId&&t.ideaId.title)||'')}</span><span class="txn-amt">+${fmt(t.amountInr||t.amountUsd)}</span></div>`).join('')}
+      `;
+    } else {
+      todayEl.innerHTML='<div class="empty-state">No activity today yet.</div>';
+    }
+
+    // Timeline chart
+    const timelineData = currentView===1
+      ? (today.receivedToday||[]).concat(today.sentToday||[]).map(t=>({ date: new Date(t.createdAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}), amount: t.amountInr||t.amountUsd||0 }))
+      : (d.txnTimeline||[]);
+    if(timelineData.length){
+      const ctx=document.getElementById('chart-timeline').getContext('2d');
+      if(timelineChart) timelineChart.destroy();
+      timelineChart=new Chart(ctx,{
+        type:'line',
+        data:{
+          labels: timelineData.map(r=>currentView===1?r.date:(r.date||'').slice(5)),
+          datasets:[{label:'₹ Flow',data:timelineData.map(r=>r.amount),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.12)',fill:true,tension:.4,pointRadius:2}]
+        },
+        options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'₹'+Number(v).toLocaleString('en-IN')},grid:{color:'rgba(148,163,184,.15)'}},x:{grid:{display:false},ticks:{maxTicksLimit:12,font:{size:10}}}}}
+      });
+    }
+
+    // Overview rounds
+    const orEl=document.getElementById('overview-rounds');
+    if((d.ideaFundingStatus||[]).length){
+      orEl.innerHTML=d.ideaFundingStatus.map(r=>`
+        <div class="idea-fund-card">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <strong style="font-size:.9rem">${esc(r.title)}</strong>
+            <span style="font-size:.8rem;font-weight:700;color:var(--accent)">${r.pct}%</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${r.pct}%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)">
+            <span>${fmt(r.raisedInr)} raised</span><span>Goal: ${fmt(r.goalInr)}</span>
+          </div>
+          <div style="font-size:.73rem;color:var(--muted);margin-top:4px">Equity: ${r.equityOffered}% · Val: ${fmt(r.valuationInr)}</div>
+          <a href="/raise-funds.html?ideaId=${r._id}" style="display:inline-block;margin-top:8px;font-size:.78rem;color:var(--accent);text-decoration:none">View Round →</a>
+        </div>`).join('');
+    } else { orEl.innerHTML='<div class="empty-state">No active rounds yet.</div>'; }
+
+    // Rounds tab
+    document.getElementById('rounds-list').innerHTML=(d.ideaFundingStatus||[]).length
+      ? d.ideaFundingStatus.map(r=>`
+          <div class="txn-row" style="flex-wrap:wrap;gap:8px">
+            <div><div style="font-weight:700">${esc(r.title)}</div>
+              <div class="prog-bar" style="width:180px;margin:4px 0"><div class="prog-fill" style="width:${r.pct}%"></div></div>
+              <div style="font-size:.73rem;color:var(--muted)">${r.pct}% funded · Equity ${r.equityOffered}% · Val ${fmt(r.valuationInr)}</div></div>
+            <div style="text-align:right"><div class="txn-amt">${fmt(r.raisedInr)}</div><div style="font-size:.73rem;color:var(--muted)">of ${fmt(r.goalInr)}</div></div>
+            <a href="/raise-funds.html?ideaId=${r._id}" class="iv-btn iv-btn-primary iv-btn-sm" style="font-size:.78rem">View Round</a>
+          </div>`).join('')
+      : '<div class="empty-state">No rounds launched yet.</div>';
+
+    // Received payments
+    document.getElementById('received-list').innerHTML=(d.receivedPayments||[]).length
+      ? d.receivedPayments.map(t=>`
+          <div class="txn-row">
+            <div><div style="font-weight:600">${esc((t.userId&&t.userId.name)||'Investor')}</div>
+              <div style="font-size:.73rem;color:var(--muted)">${esc((t.ideaId&&t.ideaId.title)||'')} · ${new Date(t.createdAt).toLocaleString('en-IN')}</div></div>
+            <div style="display:flex;align-items:center;gap:10px">${badgeHtml(t.status)}<span class="txn-amt">+${fmt(t.amountInr||t.amountUsd)}</span></div>
+          </div>`).join('')
+      : '<div class="empty-state">No payments received yet.</div>';
+
+    // My investments
+    document.getElementById('invested-list').innerHTML=(d.myTransactions||[]).length
+      ? d.myTransactions.map(t=>`
+          <div class="txn-row">
+            <div><div style="font-weight:600">${esc((t.ideaId&&t.ideaId.title)||'Idea')}</div>
+              <div style="font-size:.73rem;color:var(--muted)">${new Date(t.createdAt).toLocaleString('en-IN')}</div></div>
+            <div style="display:flex;align-items:center;gap:10px">${badgeHtml(t.status)}<span class="txn-amt out">-${fmt(t.amountInr||t.amountUsd)}</span></div>
+          </div>`).join('')
+      : '<div class="empty-state">No investments made yet.</div>';
+
+    // VC Pipeline table
+    const vcBody=document.getElementById('vc-table-body');
+    if((d.vcInvestments||[]).length){
+      vcBody.innerHTML=d.vcInvestments.map(v=>`
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px"><div style="font-weight:600">${esc(v.ideaTitle)}</div><div style="font-size:.72rem;color:var(--muted)">${esc(v.ideaCategory)}</div></td>
+          <td style="padding:10px 12px">${badgeHtml(v.status)}</td>
+          <td style="padding:10px 12px;text-align:right;font-weight:700">${fmt(v.amountInr)}</td>
+          <td style="padding:10px 12px;text-align:right">${v.equityPct}%</td>
+          <td style="padding:10px 12px;text-align:right">${fmt(v.valuationInr)}</td>
+          <td style="padding:10px 12px;text-align:center">
+            <span style="font-weight:800;color:${v.successPct>=70?'#10b981':v.successPct>=45?'#f59e0b':'#f43f5e'}">${v.successPct}%</span>
+            <div class="ml-bar-wrap"><div class="ml-bar-inner" style="width:${v.successPct}%"></div></div>
+          </td>
+        </tr>`).join('');
+    } else { vcBody.innerHTML='<tr><td colspan="6" class="empty-state">No pipeline deals. Add from <a href="/vc-dashboard.html" style="color:var(--accent)">VC Desk</a>.</td></tr>'; }
+
+    // ROI History
+    const roiEl=document.getElementById('roi-history-list');
+    if(Array.isArray(roiHistory)&&roiHistory.length){
+      roiEl.innerHTML=roiHistory.map(r=>`
+        <div class="idea-fund-card" style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-weight:700;font-size:.88rem">${esc((r.ideaId&&r.ideaId.title)||'Hypothetical')}</div>
+              <div style="font-size:.72rem;color:var(--muted)">${new Date(r.createdAt).toLocaleString('en-IN')}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800;color:var(--accent)">${r.results&&r.results.successHeuristicPct!=null?r.results.successHeuristicPct+'% success':''}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;font-size:.76rem">
+            <div style="text-align:center;padding:6px;background:rgba(99,102,241,.06);border-radius:6px"><div style="color:var(--muted)">Valuation</div><div style="font-weight:700">${fmt(r.inputs&&r.inputs.valuationUsd)}</div></div>
+            <div style="text-align:center;padding:6px;background:rgba(99,102,241,.06);border-radius:6px"><div style="color:var(--muted)">Cheque</div><div style="font-weight:700">${fmt(r.inputs&&r.inputs.amountUsd)}</div></div>
+            <div style="text-align:center;padding:6px;background:rgba(99,102,241,.06);border-radius:6px"><div style="color:var(--muted)">5y Val</div><div style="font-weight:700">${fmt(r.results&&r.results.projectedValuation5y)}</div></div>
+            <div style="text-align:center;padding:6px;background:rgba(99,102,241,.06);border-radius:6px"><div style="color:var(--muted)">Stake</div><div style="font-weight:700">${fmt(r.results&&r.results.estimatedStakeValue5y)}</div></div>
+          </div>
+        </div>`).join('');
+    } else { roiEl.innerHTML='<div class="empty-state">No simulations yet. Run one from <a href="/vc-dashboard.html" style="color:var(--accent)">VC Desk</a>.</div>'; }
+
+    // ML Insights
+    const insEl=document.getElementById('insights-list');
+    if((d.vcInvestments||[]).length){
+      insEl.innerHTML=d.vcInvestments.map(v=>`
+        <div class="idea-fund-card" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+            <div><div style="font-weight:700;font-size:.92rem">${esc(v.ideaTitle)}</div>
+              <div style="font-size:.73rem;color:var(--muted)">${esc(v.ideaCategory)} · ${badgeHtml(v.status)}</div></div>
+            <div style="text-align:right">
+              <div style="font-size:1.4rem;font-weight:800;color:${v.successPct>=70?'#10b981':v.successPct>=45?'#f59e0b':'#f43f5e'}">${v.successPct}%</div>
+              <div style="font-size:.68rem;color:var(--muted)">ML Success</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:.75rem">
+            <div style="text-align:center;padding:8px;background:rgba(99,102,241,.06);border-radius:8px"><div style="color:var(--muted)">VC Fit</div><div style="font-weight:700;color:var(--accent)">${v.vcFit}/100</div></div>
+            <div style="text-align:center;padding:8px;background:rgba(99,102,241,.06);border-radius:8px"><div style="color:var(--muted)">Innovation</div><div style="font-weight:700;color:var(--accent)">${v.innovationScore}/10</div></div>
+            <div style="text-align:center;padding:8px;background:rgba(99,102,241,.06);border-radius:8px"><div style="color:var(--muted)">Cheque</div><div style="font-weight:700;color:var(--accent)">${fmt(v.amountInr)}</div></div>
+          </div>
+          <div style="margin-top:8px;font-size:.76rem;color:var(--muted)">
+            ${v.successPct>=70?'🟢 High conviction.':v.successPct>=45?'🟡 Moderate — monitor traction.':'🔴 Low confidence — deeper diligence needed.'}
+            ${v.equityPct>0?' · Equity: '+v.equityPct+'% · Val: '+fmt(v.valuationInr):''}
+          </div>
+        </div>`).join('');
+    } else { insEl.innerHTML='<div class="empty-state">Add VC pipeline deals from <a href="/vc-dashboard.html" style="color:var(--accent)">VC Desk</a>.</div>'; }
+
+    // Distribution chart
+    if((d.vcInvestments||[]).length){
+      const statCounts={};
+      d.vcInvestments.forEach(v=>{ statCounts[v.status]=(statCounts[v.status]||0)+1; });
+      const ctx2=document.getElementById('chart-dist').getContext('2d');
+      if(distChart) distChart.destroy();
+      distChart=new Chart(ctx2,{
+        type:'doughnut',
+        data:{labels:Object.keys(statCounts),datasets:[{data:Object.values(statCounts),backgroundColor:['#6366f1','#38bdf8','#10b981','#f59e0b','#f43f5e','#a855f7'],borderWidth:0}]},
+        options:{plugins:{legend:{position:'right',labels:{font:{size:11},color:'#94a3b8'}}},cutout:'65%'}
+      });
+    }
+
+  }catch(e){ console.error(e); }
+}
+
+loadData();
+// Real-time refresh
+setInterval(loadData, 30000);
+document.addEventListener('ideavault:refresh', loadData);
+</script>
+</body>
+</html>

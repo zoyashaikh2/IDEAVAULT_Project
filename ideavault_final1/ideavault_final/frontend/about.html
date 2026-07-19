@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About — IdeaVault</title>
+  <meta name="description" content="IdeaVault is an AI-powered startup idea intelligence platform that helps founders validate, analyze, and launch their ideas with real AI tools." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/about.css" />
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+
+      <div class="iv-page about-page">
+        <h1><i class="fa-solid fa-info-circle"></i> About IdeaVault</h1>
+        <p class="about-sub">Where Ideas Take Shape — An AI-powered startup intelligence platform that turns raw concepts into validated, fundable ventures.</p>
+
+        <!-- ── Mission ── -->
+        <div class="card mission-card">
+          <h2>🎯 Our Mission</h2>
+          <p>We believe every great startup begins with a single idea. IdeaVault exists to democratize startup intelligence — giving every founder, student, and innovator access to the same caliber of market analysis, competitive intelligence, and strategic roadmapping that was once reserved for well-funded ventures. Our AI doesn't just generate suggestions — it performs real market analysis, sentiment evaluation, risk assessment, and investor matching using advanced natural language processing and machine learning techniques.</p>
+        </div>
+
+        <!-- ── What We Offer ── -->
+        <section class="about-section">
+          <h2>✨ What We Offer</h2>
+          <div class="features-grid">
+            <div class="card feature-card">
+              <div class="feature-icon purple"><i class="fa-solid fa-brain"></i></div>
+              <h3>AI Strategic Analysis</h3>
+              <p>Real-time market sizing, SWOT analysis, competitive landscape mapping, and innovation scoring powered by Claude AI — no static templates.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon blue"><i class="fa-solid fa-robot"></i></div>
+              <h3>AI Idea Generator</h3>
+              <p>Describe what you want to build, and our AI identifies market gaps, innovation angles, and crafts a unique startup concept with target customers.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon green"><i class="fa-solid fa-route"></i></div>
+              <h3>Dynamic Roadmaps</h3>
+              <p>AI generates 4-phase launch roadmaps with budgets, timelines, team requirements, and KPIs — tailored to your specific idea and market.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon orange"><i class="fa-solid fa-handshake"></i></div>
+              <h3>VC Matching Engine</h3>
+              <p>AI scores your idea against real investor profiles, ranking fit by sector, stage, and ticket size. Get actionable pitch angles for each VC.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon red"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>Duplicate Detection</h3>
+              <p>Jaccard similarity + AI verification ensures your idea is original. Get differentiation strategies if overlap is detected.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon teal"><i class="fa-solid fa-chart-pie"></i></div>
+              <h3>Sentiment Analytics</h3>
+              <p>NLP-powered community feedback analysis with positive/neutral/negative breakdowns, key themes, and AI recommendations.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Why Choose Us ── -->
+        <section class="about-section">
+          <h2>🏆 Why Choose IdeaVault</h2>
+          <div class="why-grid">
+            <div class="card why-card">
+              <div class="why-num">1</div>
+              <div>
+                <h4>Real AI, Not Templates</h4>
+                <p>Every analysis, summary, and roadmap is generated in real-time by Claude AI. No pre-built templates, no static data. Your results are unique to your idea.</p>
+              </div>
+            </div>
+            <div class="card why-card">
+              <div class="why-num">2</div>
+              <div>
+                <h4>Smart Caching</h4>
+                <p>AI results are cached in MongoDB with content hashing. Regeneration happens only when your idea changes — saving time and API costs.</p>
+              </div>
+            </div>
+            <div class="card why-card">
+              <div class="why-num">3</div>
+              <div>
+                <h4>Community-Driven Insights</h4>
+                <p>Get real feedback from other founders. Our sentiment engine analyzes comments in real-time to surface what the community thinks about your idea.</p>
+              </div>
+            </div>
+            <div class="card why-card">
+              <div class="why-num">4</div>
+              <div>
+                <h4>Investor-Ready Intelligence</h4>
+                <p>From startup health scores to VC match reports, IdeaVault prepares you for fundraising with data-driven insights and exportable reports.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Tech Stack ── -->
+        <section class="about-section">
+          <h2>🛠️ Technology Stack</h2>
+          <div class="stack-grid">
+            <div class="card stack-chip">
+              <i class="fa-brands fa-node-js"></i>
+              Node.js + Express
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-solid fa-database"></i>
+              MongoDB + Mongoose
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-solid fa-brain"></i>
+              Anthropic Claude AI
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-brands fa-js"></i>
+              Vanilla JavaScript
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-solid fa-chart-bar"></i>
+              Chart.js Analytics
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-solid fa-lock"></i>
+              JWT + bcrypt Auth
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-solid fa-envelope"></i>
+              Nodemailer Gmail
+            </div>
+            <div class="card stack-chip">
+              <i class="fa-solid fa-palette"></i>
+              Outfit + Font Awesome
+            </div>
+          </div>
+        </section>
+
+        <!-- ── AI/ML Techniques ── -->
+        <section class="about-section">
+          <h2>🧠 AI/ML Techniques Used</h2>
+          <div class="features-grid">
+            <div class="card feature-card">
+              <div class="feature-icon purple"><i class="fa-solid fa-language"></i></div>
+              <h3>Natural Language Processing</h3>
+              <p>Claude AI processes and understands idea descriptions to generate contextual market analysis, SWOT breakdowns, and strategic summaries.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon blue"><i class="fa-solid fa-face-smile"></i></div>
+              <h3>Sentiment Analysis</h3>
+              <p>Comment-level sentiment classification with polarity scoring (-100 to 100), theme extraction, and actionable founder recommendations.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon green"><i class="fa-solid fa-code-compare"></i></div>
+              <h3>Jaccard Similarity + AI Verification</h3>
+              <p>Text similarity using set intersection metrics, combined with LLM-based nuanced overlap verification for authenticity checking.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon orange"><i class="fa-solid fa-ranking-star"></i></div>
+              <h3>Composite Scoring Algorithm</h3>
+              <p>Multi-factor ranking combining likes, comments, views, ratings, and AI innovation scores with weighted coefficients for idea ranking.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon red"><i class="fa-solid fa-bullseye"></i></div>
+              <h3>VC Fit Scoring</h3>
+              <p>Per-investor AI scoring (0-100) analyzing sector alignment, stage fit, ticket compatibility, and strategic thesis match.</p>
+            </div>
+            <div class="card feature-card">
+              <div class="feature-icon teal"><i class="fa-solid fa-fingerprint"></i></div>
+              <h3>Content Hashing & Caching</h3>
+              <p>SHA-256 content fingerprinting ensures AI results are only regenerated when idea substance changes — intelligent cache invalidation.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Team ── -->
+        <section class="about-section">
+          <h2>👥 Team</h2>
+          <div class="team-grid">
+            <div class="card team-card">
+              <div class="team-avatar">👨‍💻</div>
+              <h4>Full-Stack Development</h4>
+              <p>Node.js, Express, MongoDB, Vanilla JS — built with performance and scalability in mind.</p>
+            </div>
+            <div class="card team-card">
+              <div class="team-avatar">🧠</div>
+              <h4>AI/ML Engineering</h4>
+              <p>Prompt engineering, NLP pipelines, sentiment analysis, and intelligent caching systems.</p>
+            </div>
+            <div class="card team-card">
+              <div class="team-avatar">🎨</div>
+              <h4>UI/UX Design</h4>
+              <p>Premium design system with responsive layouts, dark/light themes, and micro-animations.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Footer ── -->
+        <div class="about-footer">
+          <p>IdeaVault &copy; 2026 — Where Ideas Take Shape</p>
+          <p style="margin-top:4px">Built with ❤️ using Node.js, MongoDB, and Anthropic Claude AI</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+</body>
+</html>

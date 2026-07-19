@@ -1,0 +1,61 @@
+@import url('/login.css');
+
+.auth-wrap-wide {
+  max-width: 520px;
+}
+
+.reg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+.reg-field.span-2 {
+  grid-column: span 2;
+}
+
+.req {
+  color: #ef4444;
+}
+
+.iv-textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+@media (max-width: 560px) {
+  .reg-grid {
+    grid-template-columns: 1fr;
+  }
+  .reg-field.span-2 {
+    grid-column: span 1;
+  }
+}
+
+.success-screen {
+  text-align: center;
+  padding: 48px 32px;
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: #6366f1;
+  margin-bottom: 16px;
+}
+
+.success-title {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.success-text {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 24px;
+  font-size: 1rem;
+}
+
+.success-text strong {
+  color: #0f172a;
+}

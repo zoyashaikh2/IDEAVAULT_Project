@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Investors / VC — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <style>
+    .inv-page{max-width:1200px}
+    .inv-page h1{margin:0 0 6px;font-size:1.8rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent-blue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .inv-page .sub{color:var(--muted);margin:0 0 22px;font-size:1rem}
+    .match-box{padding:24px;margin-bottom:28px;border:1px solid rgba(99,102,241,.25);background:linear-gradient(120deg,rgba(99,102,241,.08),rgba(59,130,246,.06))}
+    .match-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px}
+    .match-row label{flex:1;min-width:200px}
+    .match-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:16px}
+    .inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+    .inv-card{padding:22px;display:flex;flex-direction:column;gap:10px}
+    .inv-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#eef2ff,#c7d2fe);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+    .inv-top{display:flex;gap:14px;align-items:center}
+    .inv-name{font-weight:800;font-size:1.05rem;margin:0}
+    .inv-firm{font-size:.85rem;color:var(--muted)}
+    .pills-row{display:flex;flex-wrap:wrap;gap:6px}
+    .inv-focus-pill{padding:4px 10px;border-radius:50px;font-size:.75rem;font-weight:600;background:rgba(99,102,241,.12);color:var(--accent)}
+    .inv-stage-pill{padding:4px 10px;border-radius:50px;font-size:.75rem;font-weight:600;background:rgba(16,185,129,.12);color:var(--success)}
+    .inv-stat-row{display:flex;gap:18px;font-size:.85rem;color:var(--muted)}
+    .inv-stat-row strong{color:var(--text)}
+    .inv-portfolio{font-size:.82rem;color:var(--muted)}
+    .inv-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+    .match-score-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:50px;font-size:.85rem;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent-blue));color:#fff}
+    .match-reason{font-size:.85rem;color:var(--muted);line-height:1.5}
+    .loading-bar{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-blue));animation:loading .9s ease-in-out infinite alternate;transform-origin:left}
+    @keyframes loading{from{transform:scaleX(.2)}to{transform:scaleX(1)}}
+    @media(max-width:640px){.match-row{flex-direction:column}}
+  </style>
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left"><button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button></div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+      <div class="iv-page inv-page">
+        <h1><i class="fa-solid fa-handshake"></i> Venture Capitalists &amp; Investors</h1>
+        <p class="sub">
+          Find your best VC match powered by AI, then pitch with confidence.
+          <a href="/vc-dashboard.html" style="margin-left:10px" class="iv-btn iv-btn-secondary iv-btn-sm"><i class="fa-solid fa-chart-line"></i> VC Desk — live pipeline</a>
+        </p>
+
+        <section class="card match-box">
+          <h3 style="margin:0 0 14px;font-size:1.1rem">🤖 Find Your Best VC Match</h3>
+          <div class="match-row">
+            <div style="flex:1;min-width:200px">
+              <label class="iv-label" for="idea-select">Select one of your published ideas</label>
+              <select id="idea-select" class="iv-input"><option value="">— choose an idea —</option></select>
+            </div>
+            <button class="iv-btn iv-btn-primary" id="btn-match"><i class="fa-solid fa-magnifying-glass-chart"></i> Find VC Matches</button>
+          </div>
+          <div id="match-loading" hidden><div class="loading-bar"></div><p style="color:var(--muted);font-size:.9rem;margin-top:8px">Matching with sector, stage, innovation, and engagement signals (rule-based, no per-investor API calls)…</p></div>
+          <div class="match-results" id="match-results"></div>
+        </section>
+
+        <h2 style="margin:0 0 16px;font-size:1.2rem">All Investors</h2>
+        <div class="inv-grid" id="inv-grid"><p style="color:var(--muted)">Loading investors…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="iv-popup-backdrop" id="inv-detail-popup" aria-hidden="true">
+    <div class="iv-popup" role="dialog" style="max-width:520px">
+      <button type="button" class="iv-popup-close" id="inv-detail-close" aria-label="Close">✕</button>
+      <div id="inv-detail-body" style="padding:8px 4px 0;font-size:.95rem;line-height:1.55"></div>
+    </div>
+  </div>
+
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script src="/contact-creator.js"></script>
+  <script>
+  var API = (window.location.origin && window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:5000') + '/api';
+  function esc(s){var d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML;}
+  var allInvestors=[];
+  var myIdeas=[];
+
+  function mailtoInvestor(inv, ideaTitle){
+    var sub='Investment Inquiry — '+(ideaTitle||'My startup idea');
+    var body='Hi '+inv.name+',\n\nI am building "'+(ideaTitle||'my venture')+'" and IdeaVault matched us based on sector and stage fit.\n\nI would love a short conversation about potential alignment.\n\nRegards';
+    return 'mailto:'+String(inv.email||'')+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body);
+  }
+
+  function renderInvCard(inv,score,reason){
+    return '<div class="card inv-card" data-inv-id="'+esc(inv._id||'')+'">'
+      +'<div class="inv-top"><div class="inv-logo">'
+      +(inv.photo?'<img src="'+esc(inv.photo)+'" style="width:100%;height:100%;object-fit:cover;border-radius:14px" alt="" />':'<i class="fa-solid fa-building-columns"></i>')
+      +'</div><div><p class="inv-name">'+esc(inv.name)+'</p><span class="inv-firm">'+esc(inv.firm||'')+'</span></div>'
+      +(score!=null?'<span class="match-score-badge" style="margin-left:auto">'+Math.round(score)+'%</span>':'')+'</div>'
+      +'<div class="pills-row">'+(inv.focus||[]).map(function(f){return '<span class="inv-focus-pill">'+esc(f)+'</span>';}).join('')+'</div>'
+      +'<div class="pills-row">'+(inv.stagePreference||[]).map(function(s){return '<span class="inv-stage-pill">'+esc(s)+'</span>';}).join('')+'</div>'
+      +'<div class="inv-stat-row"><span><strong>Ticket</strong> '+esc(inv.ticketSize||'—')+'</span><span><strong>Location</strong> '+esc(inv.location||'—')+'</span></div>'
+      +(inv.portfolio&&inv.portfolio.length?'<div class="inv-portfolio">Portfolio: '+esc(inv.portfolio.join(', '))+'</div>':'')
+      +(reason?'<div class="match-reason">'+esc(reason)+'</div>':'<div class="match-reason">'+esc(inv.description||'')+'</div>')
+      +'<div class="inv-actions">'
+      +'<button type="button" class="iv-btn iv-btn-ghost iv-btn-sm inv-detail-btn" data-inv-detail="'+esc(inv._id||'')+'"><i class="fa-solid fa-circle-info"></i> Details</button>'
+      +'<button type="button" class="iv-btn iv-btn-primary iv-btn-sm iv-inv-contact-btn" data-inv-mail="'+esc(inv._id||'')+'"><i class="fa-solid fa-envelope"></i> Contact</button>'
+      +(score!=null?'<button type="button" class="iv-btn iv-btn-accent iv-btn-sm iv-inv-fundraise-btn" data-inv-name="'+esc(inv.name || '')+'"><i class="fa-solid fa-indian-rupee-sign"></i> Initiate Fundraise</button>':'')
+      +(inv.website?'<a class="iv-btn iv-btn-secondary iv-btn-sm" href="'+esc(inv.website)+'" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Website</a>':'')
+      +'</div></div>';
+  }
+
+  // Load ideas + investors
+  Promise.all([
+    fetch(API+'/ideas').then(function(r){return r.json();}),
+    fetch(API+'/investors').then(function(r){return r.json();})
+  ]).then(function(all){
+    var ideas=(all[0]||[]);
+    allInvestors=(all[1]||[]);
+    myIdeas=ideas.filter(function(i){return String(i.userId)===String(window._ivUserId)&&i.status==='Published';});
+
+    var sel=document.getElementById('idea-select');
+    myIdeas.forEach(function(i){
+      var opt=document.createElement('option');
+      opt.value=i._id;
+      opt.textContent=i.title;
+      sel.appendChild(opt);
+    });
+
+    document.getElementById('inv-grid').innerHTML=allInvestors.length
+      ?allInvestors.map(function(inv){return renderInvCard(inv,null,null);}).join('')
+      :'<p style="color:var(--muted)">No investors found.</p>';
+    wireInvGridMailtos();
+    document.getElementById('idea-select').addEventListener('change', wireInvGridMailtos);
+    
+    // Auto-trigger match if arriving from an idea card
+    var urlParams = new URLSearchParams(window.location.search);
+    var matchIdeaId = urlParams.get('matchIdea');
+    if (matchIdeaId) {
+      var found = myIdeas.find(function(i) { return String(i._id) === matchIdeaId; });
+      if (found) {
+        sel.value = matchIdeaId;
+        setTimeout(function() { document.getElementById('btn-match').click(); }, 150);
+      }
+    }
+    
+  }).catch(function(){
+    document.getElementById('inv-grid').innerHTML='<p style="color:var(--danger)">Could not load data.</p>';
+  });
+
+  function selectedIdeaTitle(){
+    var sel=document.getElementById('idea-select');
+    var opt=sel&&sel.options[sel.selectedIndex];
+    if (opt && !opt.value) return '';
+    return opt?opt.textContent:'';
+  }
+
+  function wireInvGridMailtos(){
+    var title=selectedIdeaTitle();
+    var selectedIdeaId = document.getElementById('idea-select').value;
+    document.querySelectorAll('.iv-inv-contact-btn').forEach(function(btn){
+      btn.onclick=function(){
+        var id=btn.getAttribute('data-inv-mail');
+        var inv=allInvestors.find(function(x){return String(x._id)===String(id);});
+        if(!inv)return;
+
+        if (window.IdeaVaultContact && IdeaVaultContact.openModal) {
+          IdeaVaultContact.openModal({
+            ideaId: selectedIdeaId || null,
+            email: inv.email,
+            phone: inv.phone,
+            creatorName: inv.name,
+            ideaTitle: title || 'my venture',
+            subject: 'Investment Inquiry — ' + (title || 'My startup idea'),
+            body: 'Hi ' + inv.name + ',\n\nI am building "' + (title || 'my venture') + '" and IdeaVault matched us based on sector and stage fit.\n\nI would love a short conversation about potential alignment.\n\nRegards'
+          });
+          return;
+        }
+
+        var em=String(inv.email||'').trim();
+        if(em){
+          var sub='Investment Inquiry — '+(title||'My startup idea');
+          var body='Hi '+inv.name+',\n\nI am building "'+(title||'my venture')+'" and IdeaVault matched us based on sector and stage fit.\n\nI would love a short conversation about potential alignment.\n\nRegards';
+          window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(em)+'&su='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body),'_blank','noopener,noreferrer');
+          return;
+        }
+        if(inv.website){window.open(inv.website,'_blank','noopener,noreferrer');return;}
+        if(inv.phone&&String(inv.phone).trim()){window.location.href='tel:'+String(inv.phone).replace(/\s+/g,'');return;}
+        alert('No email, phone, or website is on file for this investor yet.');
+      };
+    });
+    document.querySelectorAll('.iv-inv-fundraise-btn').forEach(function(btn){
+      btn.onclick=function(){
+        var ideaId = document.getElementById('idea-select').value;
+        var invName = btn.getAttribute('data-inv-name');
+        // Redirect to VC Desk prefilled in Rupees (₹)!
+        window.location.href = '/vc-dashboard.html?ideaId=' + encodeURIComponent(ideaId) + '&status=Interested&cheque=5000000&equity=10&valuation=50000000';
+      };
+    });
+    document.querySelectorAll('.inv-detail-btn').forEach(function(btn){
+      btn.onclick = function () {
+        var id = btn.getAttribute('data-inv-detail');
+        var inv = allInvestors.find(function (x) {
+          return String(x._id) === String(id);
+        });
+        if (!inv) return;
+        var b = document.getElementById('inv-detail-body');
+        var mailUrl = mailtoInvestor(inv, title || 'My startup');
+        var qr =
+          'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(mailUrl);
+        b.innerHTML =
+          '<h3 style="margin:0 0 10px">' +
+          esc(inv.name) +
+          '</h3><p style="color:var(--muted);margin:0 0 12px">' +
+          esc(inv.firm || '') +
+          ' · ' +
+          esc(inv.location || '') +
+          '</p>' +
+          '<p style="line-height:1.55">' +
+          esc(inv.description || '') +
+          '</p>' +
+          (inv.thesis
+            ? '<p style="margin-top:14px"><strong>Investment thesis</strong><br />' + esc(inv.thesis) + '</p>'
+            : '') +
+          (inv.sweetSpot
+            ? '<p style="margin-top:10px"><strong>Sweet spot</strong><br />' + esc(inv.sweetSpot) + '</p>'
+            : '') +
+          (inv.process
+            ? '<p style="margin-top:10px"><strong>How they work with founders</strong><br />' + esc(inv.process) + '</p>'
+            : '') +
+          '<p style="margin-top:12px"><strong>Focus</strong> ' +
+          (inv.focus || [])
+            .map(function (f) {
+              return esc(f);
+            })
+            .join(', ') +
+          '</p>' +
+          '<p><strong>Stages</strong> ' +
+          (inv.stagePreference || []).join(', ') +
+          '</p>' +
+          '<p><strong>Ticket</strong> ' +
+          esc(inv.ticketSize || '') +
+          '</p>' +
+          (inv.portfolio && inv.portfolio.length
+            ? '<p><strong>Portfolio</strong> ' + esc(inv.portfolio.join(', ')) + '</p>'
+            : '') +
+          '<div style="margin-top:18px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">' +
+          '<div><p style="font-size:0.8rem;color:var(--muted);margin:0 0 6px">QR — scan to open email draft</p>' +
+          '<img src="' +
+          qr +
+          '" width="140" height="140" alt="QR code for contact" /></div>' +
+          '<div style="flex:1;min-width:200px;font-size:0.88rem;color:var(--muted);line-height:1.55"><p style="margin:0 0 8px"><strong>Tip:</strong> Select your published idea above so the mailto template references your concept.</p></div></div>';
+        document.getElementById('inv-detail-popup').classList.add('is-open');
+      };
+    });
+  }
+
+  document.getElementById('inv-detail-close').addEventListener('click',function(){document.getElementById('inv-detail-popup').classList.remove('is-open');});
+  document.getElementById('inv-detail-popup').addEventListener('click',function(e){if(e.target&&e.target.id==='inv-detail-popup') document.getElementById('inv-detail-popup').classList.remove('is-open');});
+
+  document.getElementById('btn-match').addEventListener('click',function(){
+    var ideaId=document.getElementById('idea-select').value;
+    if(!ideaId){alert('Please select one of your published ideas first.');return;}
+    var loading=document.getElementById('match-loading');
+    var results=document.getElementById('match-results');
+    loading.hidden=false;
+    results.innerHTML='';
+    
+    // Using the new dynamic ML matchmaking endpoint
+    fetch(API+'/investors/match/'+ideaId)
+      .then(function(r){return r.json();})
+      .then(function(matches){
+        loading.hidden=true;
+        if(matches.error){results.innerHTML='<p style="color:var(--danger)">'+esc(matches.error)+'</p>';return;}
+        if(!matches.length){results.innerHTML='<p style="color:var(--muted)">No matches found for this sector/stage yet.</p>';return;}
+        
+        matches.forEach(function(m){
+          if (m.investor && !allInvestors.some(function(x){return String(x._id)===String(m.investor._id);})) {
+            allInvestors.push(m.investor);
+          }
+        });
+
+        results.innerHTML=matches.map(function(m){
+          return renderInvCard(m.investor||{}, m.matchScore, m.matchLabel + " fit: " + (m.investor.thesis || m.investor.description || ''));
+        }).join('');
+        wireInvGridMailtos();
+      })
+      .catch(function(e){
+        loading.hidden=true;
+        results.innerHTML='<p style="color:var(--danger)">Match failed: '+esc(e.message||'')+'</p>';
+      });
+  });
+  </script>
+</body>
+</html>

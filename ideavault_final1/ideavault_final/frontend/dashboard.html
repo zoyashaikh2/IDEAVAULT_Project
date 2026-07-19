@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/dashboard.css" />
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button type="button" class="iv-icon-btn" data-theme-toggle aria-label="Toggle theme"></button>
+          <a data-top-profile href="/profile.html" class="iv-icon-btn" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button type="button" class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+
+      <div class="iv-page dash-page">
+        <section class="dash-hero">
+          <div class="dash-hero-copy">
+            <h1 class="dash-hero-title">Turn Ideas Into Impact</h1>
+            <p class="dash-hero-sub">Track momentum, surface your best concepts, and learn from the community — all in one bright workspace.</p>
+            <div class="dash-hero-cta">
+              <a class="iv-btn iv-btn-primary" href="/create-idea.html"><i class="fa-solid fa-wand-magic-sparkles"></i> Create Idea</a>
+              <a class="iv-btn iv-btn-secondary" href="/inspired.html"><i class="fa-solid fa-rocket"></i> Get Inspired</a>
+            </div>
+          </div>
+          <div class="dash-hero-stats">
+            <div class="dash-mini-stat card" data-stat="ideas"><span class="lbl">Total Ideas</span><strong data-count="ideas">0</strong></div>
+            <div class="dash-mini-stat card" data-stat="pub"><span class="lbl">Published</span><strong data-count="pub">0</strong></div>
+            <div class="dash-mini-stat card" data-stat="draft"><span class="lbl">Drafts</span><strong data-count="draft">0</strong></div>
+          </div>
+        </section>
+
+        <section class="dash-health card">
+          <div class="dash-health-grid">
+            <div class="dash-ring-wrap">
+              <svg class="dash-ring" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="dash-ring-bg" cx="60" cy="60" r="52" />
+                <circle class="dash-ring-fg" cx="60" cy="60" r="52" data-health-ring />
+              </svg>
+              <div class="dash-ring-label">
+                <span class="dash-ring-num" data-health-num>—</span>
+                <span class="dash-ring-sub">/100</span>
+              </div>
+            </div>
+            <div>
+              <h2 class="dash-section-title">Startup Health Score</h2>
+              <p class="dash-health-tagline" data-health-label>Building your profile…</p>
+              <table class="dash-factor-table">
+                <thead><tr><th>Factor</th><th>Signal</th></tr></thead>
+                <tbody data-health-factors></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="dash-ai-callout" data-health-ai>
+            <i class="fa-solid fa-robot"></i>
+            <p data-health-ai-text>Your personalized score narrative will appear here once we analyze your traction.</p>
+          </div>
+        </section>
+
+        <section class="dash-split">
+          <div class="dash-chart-card card">
+            <h3 class="dash-section-title sm">Weekly Reach</h3>
+            <canvas id="chart-weekly" height="220"></canvas>
+            <p class="dash-chart-insight" data-weekly-insight>Loading trend…</p>
+          </div>
+          <div class="dash-side-metrics">
+            <div class="dash-metric card"><span class="lbl">Total Likes</span><strong data-metric-likes>0</strong></div>
+            <div class="dash-metric card"><span class="lbl">Comments</span><strong data-metric-comments>0</strong></div>
+            <div class="dash-metric card"><span class="lbl">Views</span><strong data-metric-views>0</strong></div>
+            <div class="dash-chips">
+              <span class="iv-pill">Conversion <strong data-chip-conv>0%</strong></span>
+              <span class="iv-pill">Engagement <strong data-chip-eng>0%</strong></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="dash-spotlight" data-spotlight-wrap hidden>
+          <div class="card dash-spotlight-card">
+            <span class="dash-spot-badge">🏆 Best Idea of the Week</span>
+            <div class="dash-spot-inner" data-spotlight></div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="dash-section-title">Trending Ideas</h2>
+          <p class="dash-section-sub">Ranked by composite engagement score across the network.</p>
+          <div class="dash-idea-grid" data-trending></div>
+        </section>
+
+        <section>
+          <h2 class="dash-section-title">My Active Ventures</h2>
+          <p class="dash-section-sub">Manage your active startups, find matches, and raise capital.</p>
+          <div class="dash-idea-grid" data-published-ventures></div>
+        </section>
+
+        <section class="dash-drafts-sec">
+          <h2 class="dash-section-title">Your Drafts</h2>
+          <p class="dash-section-sub">Ideas in progress — pick up where you left off.</p>
+          <div class="dash-idea-grid" data-drafts></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idea detail -->
+  <div class="iv-popup-backdrop" id="popup-idea" aria-hidden="true">
+    <div class="iv-popup" role="dialog" aria-modal="true" aria-labelledby="idea-popup-title">
+      <button type="button" class="iv-popup-close" data-close-idea aria-label="Close">✕</button>
+      <div class="iv-popup-body" id="idea-popup-body"></div>
+    </div>
+  </div>
+
+  <!-- Strategic analytics -->
+  <div class="iv-popup-backdrop" id="popup-strat" aria-hidden="true">
+    <div class="iv-popup iv-popup-full" role="dialog" aria-modal="true">
+      <button type="button" class="iv-popup-close" data-close-strat aria-label="Close">✕</button>
+      <div class="strat-toolbar">
+        <h2 class="strat-title" data-strat-title>Strategic Analytics</h2>
+        <div class="strat-actions">
+          <button type="button" class="iv-btn iv-btn-primary iv-btn-sm" id="btn-creator-pack" hidden>
+            <i class="fa-solid fa-file-contract"></i> Full creator report
+          </button>
+          <button type="button" class="iv-btn iv-btn-secondary iv-btn-sm" data-print-strat><i class="fa-solid fa-file-pdf"></i> Print view</button>
+        </div>
+      </div>
+      <div class="strat-panes">
+        <div class="strat-left iv-popup-body" data-strat-left></div>
+        <div class="strat-right iv-popup-body" data-strat-right></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="iv-toast" class="iv-toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
+  <script src="/iv-socket.js"></script>
+  <script src="/iv-money.js"></script>
+  <script src="/contact-creator.js"></script>
+  <script src="/strategic-shared.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script src="/ideacard-shared.js"></script>
+  <script src="/venture-logic.js"></script>
+  <script src="/dashboard.js"></script>
+</body>
+</html>

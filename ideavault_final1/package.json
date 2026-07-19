@@ -1,0 +1,11 @@
+{
+  "name": "ideavault-root",
+  "private": true,
+  "description": "Run backend/frontend from repo root — real code lives in ideavault_final/",
+  "scripts": {
+    "start": "npm start --prefix ideavault_final/backend",
+    "install:backend": "npm install --prefix ideavault_final/backend",
+    "start:backend": "npm start --prefix ideavault_final/backend",
+    "install:all": "npm install --prefix ideavault_final/backend"
+  }
+}

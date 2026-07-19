@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blog — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <style>
+    .blog-page{max-width:1200px}
+    .blog-page h1{margin:0 0 6px;font-size:1.8rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent-blue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .blog-top-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .blog-cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+    .blog-cat{padding:6px 18px;border-radius:50px;font-size:.82rem;font-weight:600;border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s}
+    .blog-cat.active,.blog-cat:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+    /* Featured */
+    .featured-card{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:28px;margin-bottom:32px;overflow:hidden}
+    .featured-img{border-radius:16px;overflow:hidden;min-height:220px;background:linear-gradient(135deg,#6366f1,#3b82f6);position:relative}
+    .featured-img img{width:100%;height:100%;object-fit:cover}
+    .featured-body{display:flex;flex-direction:column;justify-content:center;gap:12px}
+    .featured-badge{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent-blue));color:#fff;font-size:.7rem;font-weight:800;padding:4px 12px;border-radius:50px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    .featured-title{margin:0;font-size:1.45rem;font-weight:800;line-height:1.3}
+    .featured-summary{color:var(--muted);font-size:.95rem;line-height:1.55;margin:0}
+    .author-chip{display:flex;align-items:center;gap:10px;font-size:.85rem}
+    .author-chip img{width:32px;height:32px;border-radius:50%;object-fit:cover;background:var(--bg)}
+    .stars{color:#f59e0b;letter-spacing:2px;font-size:.9rem}
+    /* Grid */
+    .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .blog-card{overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
+    .blog-card-img{height:180px;background:linear-gradient(135deg,#e0e7ff,#dbeafe);position:relative;overflow:hidden}
+    .blog-card-img img{width:100%;height:100%;object-fit:cover}
+    .blog-card-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:8px}
+    .blog-card-title{margin:0;font-size:1rem;font-weight:700;line-height:1.35}
+    .blog-card-summary{font-size:.85rem;color:var(--muted);line-height:1.5;flex:1;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .blog-card-foot{padding:12px 18px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+    /* Write modal */
+    .write-form{display:flex;flex-direction:column;gap:12px}
+    /* Detail popup */
+    .blog-detail-content{font-size:.98rem;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-word}
+    .review-list{list-style:none;padding:0;margin:0 0 12px}
+    .review-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+    @media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.featured-card{grid-template-columns:1fr}.blog-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left"><button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button></div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+      <div class="iv-page blog-page">
+        <div class="blog-top-bar">
+          <h1><i class="fa-solid fa-blog"></i> Community Blog</h1>
+          <button class="iv-btn iv-btn-primary" id="btn-write"><i class="fa-solid fa-pen-to-square"></i> Write Article</button>
+        </div>
+        <div class="blog-cats" id="blog-cats"></div>
+        <div id="featured-wrap"></div>
+        <div class="blog-grid" id="blog-grid"><p style="color:var(--muted)">Loading articles…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Write modal -->
+  <div class="iv-popup-backdrop" id="popup-write">
+    <div class="iv-popup" style="max-width:640px" role="dialog" aria-modal="true">
+      <button class="iv-popup-close" data-close-write>✕</button>
+      <div class="iv-popup-body">
+        <h3 style="margin:0 0 16px;font-size:1.1rem">Write an Article</h3>
+        <div id="write-msg" style="min-height:1rem;font-size:.9rem;margin-bottom:8px"></div>
+        <form id="write-form" class="write-form" novalidate>
+          <div><label class="iv-label" for="w-title">Title *</label><input id="w-title" class="iv-input" required /></div>
+          <div>
+            <label class="iv-label" for="w-cat">Category</label>
+            <select id="w-cat" class="iv-input"><option>Startup Tips</option><option>AI/ML</option><option>Product</option><option>Marketing</option><option>Funding</option><option>Technology</option><option>Founder Stories</option><option>Other</option></select>
+          </div>
+          <div><label class="iv-label" for="w-summary">Summary *</label><textarea id="w-summary" class="iv-input" rows="2" required style="resize:vertical"></textarea></div>
+          <div><label class="iv-label" for="w-content">Content *</label><textarea id="w-content" class="iv-input" rows="8" required style="resize:vertical;min-height:160px"></textarea></div>
+          <div><label class="iv-label" for="w-image">Cover image</label><input id="w-image" class="iv-input" type="file" accept="image/*" /></div>
+          <img id="w-img-preview" alt="" style="display:none;width:100%;max-height:160px;border-radius:12px;object-fit:cover;margin-top:4px" />
+          <button type="submit" class="iv-btn iv-btn-primary"><i class="fa-solid fa-paper-plane"></i> Publish</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog detail popup -->
+  <div class="iv-popup-backdrop" id="popup-blog">
+    <div class="iv-popup" style="max-width:780px" role="dialog" aria-modal="true">
+      <button class="iv-popup-close" data-close-blog>✕</button>
+      <div class="iv-popup-body" id="blog-popup-body"></div>
+    </div>
+  </div>
+
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script>
+  var API = (window.location.origin && window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:5000') + '/api';
+  var BLOG_CATS=['All','Startup Tips','AI/ML','Product','Marketing','Funding','Technology','Founder Stories','Other'];
+  var allBlogs=[];
+  var activeCat='All';
+  function esc(s){var d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML;}
+
+  function starStr(n){
+    var s='';for(var i=0;i<5;i++) s+=i<n?'★':'☆';return s;
+  }
+  function avgRating(reviews){
+    if(!reviews||!reviews.length) return 0;
+    return reviews.reduce(function(a,r){return a+r.rating;},0)/reviews.length;
+  }
+
+  // Category pills
+  var catsEl=document.getElementById('blog-cats');
+  BLOG_CATS.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='blog-cat'+(c==='All'?' active':'');btn.textContent=c;
+    btn.addEventListener('click',function(){
+      activeCat=c;
+      catsEl.querySelectorAll('.blog-cat').forEach(function(x){x.classList.remove('active')});
+      btn.classList.add('active');renderBlogs();
+    });
+    catsEl.appendChild(btn);
+  });
+
+  function authorImg(blog){
+    if(!blog.authorImg) return '';
+    if(blog.authorImg.indexOf('http')===0) return '<img src="'+esc(blog.authorImg)+'" alt="" />';
+    if(blog.authorImg.indexOf('data:')===0) return '<img src="'+esc(blog.authorImg)+'" alt="" />';
+    return '';
+  }
+
+  function renderFeatured(blog,avgR){
+    var fw=document.getElementById('featured-wrap');
+    if(!blog){fw.innerHTML='';return;}
+    fw.innerHTML='<div class="card featured-card">'
+      +'<div class="featured-img">'+(blog.image&&blog.image.indexOf('data:')===0?'<img src="'+esc(blog.image)+'" alt="" />':'')+'</div>'
+      +'<div class="featured-body">'
+      +'<span class="featured-badge"><i class="fa-solid fa-star"></i> Featured</span>'
+      +'<h2 class="featured-title">'+esc(blog.title)+'</h2>'
+      +'<p class="featured-summary">'+esc(blog.summary||'')+'</p>'
+      +'<div class="author-chip">'+authorImg(blog)+'<span>'+esc(blog.author||'')+'</span><span style="margin-left:auto" class="stars">'+starStr(Math.round(avgR))+'</span></div>'
+      +'<div style="display:flex;gap:8px;margin-top:8px">'
+      +'<button class="iv-btn iv-btn-primary iv-btn-sm" onclick="openBlog(\''+esc(blog._id)+'\')">Read Article</button>'
+      +'<button class="iv-like" onclick="likeBlog(\''+esc(blog._id)+'\',this)" style="gap:6px"><i class="fa-regular fa-heart"></i> '+(blog.likes?blog.likes.length:0)+'</button>'
+      +'</div></div></div>';
+  }
+
+  function renderBlogs(){
+    var grid=document.getElementById('blog-grid');
+    var filtered=allBlogs.filter(function(b){return activeCat==='All'||b.category===activeCat;});
+    var nonFeatured=filtered.filter(function(b){return !b.featured;});
+    if(!nonFeatured.length){grid.innerHTML='<p style="color:var(--muted)">No articles yet in this category.</p>';return;}
+    grid.innerHTML=nonFeatured.map(function(blog){
+      return '<div class="card blog-card" data-blog-id="'+esc(blog._id)+'">'
+        +'<div class="blog-card-img">'+(blog.image&&blog.image.indexOf('data:')===0?'<img src="'+esc(blog.image)+'" alt="" />':'')
+        +'<div style="position:absolute;top:10px;left:10px"><span class="iv-pill" style="font-size:.7rem">'+esc(blog.category||'')+'</span></div></div>'
+        +'<div class="blog-card-body">'
+        +'<h3 class="blog-card-title">'+esc(blog.title)+'</h3>'
+        +'<p class="blog-card-summary">'+esc(blog.summary||'')+'</p>'
+        +'</div>'
+        +'<div class="blog-card-foot">'
+        +'<div class="author-chip">'+authorImg(blog)+'<span>'+esc(blog.author||'Unknown')+'</span></div>'
+        +'<button class="iv-btn iv-btn-primary iv-btn-sm" onclick="openBlog(\''+esc(blog._id)+'\')">Read</button>'
+        +'</div></div>';
+    }).join('');
+    grid.querySelectorAll('[data-blog-id]').forEach(function(el){
+      el.addEventListener('click',function(e){if(!e.target.closest('.iv-btn')&&!e.target.closest('.iv-like')) openBlog(el.getAttribute('data-blog-id'));});
+    });
+  }
+
+  function openBlog(id){
+    Promise.all([
+      fetch(API+'/blogs/'+id).then(function(r){return r.json();}),
+      fetch(API+'/blog-reviews/'+id).then(function(r){return r.json();})
+    ]).then(function(all){
+      var blog=all[0];var reviews=all[1]||[];
+      if(!blog||blog.error) return;
+      var body=document.getElementById('blog-popup-body');
+      var avgR=avgRating(reviews);
+      body.innerHTML='<div style="height:200px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#3b82f6);margin-bottom:20px;overflow:hidden;position:relative">'
+        +(blog.image&&blog.image.indexOf('data:')===0?'<img src="'+esc(blog.image)+'" style="width:100%;height:100%;object-fit:cover" alt="" />':'')+'</div>'
+        +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><span class="iv-pill">'+esc(blog.category||'')+'</span><span class="iv-pill">'+esc(blog.readTime||'')+'</span></div>'
+        +'<h2 style="margin:0 0 8px;font-size:1.35rem">'+esc(blog.title)+'</h2>'
+        +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'+authorImg(blog)
+        +'<span style="font-size:.85rem;color:var(--muted)">'+esc(blog.author||'')+'</span>'
+        +'<span class="stars">'+starStr(Math.round(avgR))+'</span>'
+        +'<span style="font-size:.8rem;color:var(--muted)">'+reviews.length+' reviews</span>'
+        +'<button class="iv-like" data-like-blog="'+esc(id)+'" style="margin-left:auto;gap:6px"><svg viewBox="0 0 24 24"><path d="M12 21s-6.716-4.576-9-8.5C.5 8.5 2 5 6 5c2.5 0 4.5 2 6 3.5C13.5 7 15.5 5 18 5c4 0 5.5 3.5 4 7.5-2.284 3.924-9 8.5-9 8.5z"/></svg> <span class="iv-like-count">'+(blog.likes?blog.likes.length:0)+'</span></button>'
+        +'</div>'
+        +'<div class="blog-detail-content">'+esc(blog.content||'')+'</div>'
+        +'<hr style="margin:24px 0;border-color:var(--border)" />'
+        +'<h4 style="margin:0 0 12px">Reviews ('+reviews.length+')</h4>'
+        +'<ul class="review-list">'+(reviews.length?reviews.map(function(rv){return '<li class="review-item"><strong>'+esc(rv.userName||'User')+'</strong> <span class="stars" style="font-size:.8rem">'+starStr(rv.rating)+'</span><br><span style="color:var(--muted)">'+esc(rv.text||'')+'</span></li>';}).join(''):'<li style="color:var(--muted);padding:8px 0">No reviews yet. Be the first!</li>')+'</ul>'
+        +'<h4 style="margin:16px 0 10px">Leave a review</h4>'
+        +'<div style="display:flex;flex-direction:column;gap:10px">'
+        +'<label class="iv-label">Rating<select data-rv-rating class="iv-input" style="width:auto;margin-left:8px"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select></label>'
+        +'<textarea class="iv-input" rows="2" placeholder="Share your thoughts…" data-rv-text style="resize:vertical"></textarea>'
+        +'<button class="iv-btn iv-btn-secondary iv-btn-sm" data-post-review="'+esc(id)+'"><i class="fa-solid fa-star"></i> Submit Review</button>'
+        +'</div>';
+
+      document.getElementById('popup-blog').classList.add('is-open');
+
+      var lb=body.querySelector('[data-like-blog]');
+      if(lb) lb.addEventListener('click',function(){likeBlog(id,lb);});
+
+      body.querySelector('[data-post-review]').addEventListener('click',function(){
+        var rating=Number(body.querySelector('[data-rv-rating]').value)||5;
+        var text=body.querySelector('[data-rv-text]').value.trim();
+        var uid=window._ivUserId||localStorage.getItem('ideavault_userId');
+        var uname=window._ivUser&&window._ivUser.name||'User';
+        fetch(API+'/blog-reviews',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({blogId:id,userId:uid,userName:uname,rating:rating,text:text})})
+          .then(function(r){return r.json();}).then(function(rv){
+            if(rv.error){alert(rv.error);return;}
+            body.querySelector('[data-rv-text]').value='';
+            openBlog(id);
+          }).catch(function(){alert('Review failed.');});
+      });
+    }).catch(function(){});
+  }
+
+  window.likeBlog=function(id,btn){
+    var uid=window._ivUserId||localStorage.getItem('ideavault_userId');
+    fetch(API+'/blogs/'+id+'/like',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d.error) return;
+        if(btn){
+          btn.classList.toggle('liked',d.liked);
+          var s=btn.querySelector('.iv-like-count');if(s) s.textContent=String(d.count);
+          else btn.textContent=(btn.textContent.replace(/\d+/,String(d.count)));
+        }
+      }).catch(function(){});
+  };
+
+  document.querySelector('[data-close-write]').addEventListener('click',function(){document.getElementById('popup-write').classList.remove('is-open');});
+  document.querySelector('[data-close-blog]').addEventListener('click',function(){document.getElementById('popup-blog').classList.remove('is-open');});
+  document.getElementById('popup-blog').addEventListener('click',function(e){if(e.target&&e.target.id==='popup-blog') document.getElementById('popup-blog').classList.remove('is-open');});
+
+  document.getElementById('btn-write').addEventListener('click',function(){document.getElementById('popup-write').classList.add('is-open');});
+  document.getElementById('w-image').addEventListener('change',function(){
+    var f=this.files&&this.files[0];if(!f) return;
+    var reader=new FileReader();
+    reader.onload=function(ev){var p=document.getElementById('w-img-preview');p.src=String(ev.target.result||'');p.style.display='block';};
+    reader.readAsDataURL(f);
+  });
+
+  document.getElementById('write-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var msg=document.getElementById('write-msg');
+    msg.textContent='Publishing…';msg.style.color='var(--muted)';
+    var imgPreview=document.getElementById('w-img-preview').src;
+    var uid=window._ivUserId||localStorage.getItem('ideavault_userId');
+    var titleEl=document.getElementById('w-title');
+    if(!titleEl.value.trim()){msg.textContent='Title is required.';msg.style.color='var(--danger)';return;}
+    var words=document.getElementById('w-content').value.trim().split(/\s+/).length;
+    var rt=words>200?Math.ceil(words/200)+' min read':'1 min read';
+    fetch(API+'/blogs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      userId:uid,
+      title:titleEl.value.trim(),
+      category:document.getElementById('w-cat').value,
+      summary:document.getElementById('w-summary').value.trim(),
+      content:document.getElementById('w-content').value.trim(),
+      image:imgPreview&&imgPreview.indexOf('data:')===0?imgPreview:'',
+      readTime:rt,
+      featured:false
+    })}).then(function(r){return r.json();}).then(function(b){
+      if(b.error){msg.textContent=b.error;msg.style.color='var(--danger)';return;}
+      document.getElementById('popup-write').classList.remove('is-open');
+      document.getElementById('write-form').reset();
+      document.getElementById('w-img-preview').style.display='none';
+      msg.textContent='';
+      loadBlogs();
+    }).catch(function(){msg.textContent='Publish failed.';msg.style.color='var(--danger)';});
+  });
+
+  function loadBlogs(){
+    fetch(API+'/blogs').then(function(r){return r.json();}).then(function(blogs){
+      allBlogs=blogs||[];
+      var featured=allBlogs.find(function(b){return b.featured;})||allBlogs[0];
+      renderFeatured(featured,0);
+      renderBlogs();
+    }).catch(function(){document.getElementById('blog-grid').innerHTML='<p style="color:var(--danger)">Could not load articles.</p>';});
+  }
+  loadBlogs();
+  </script>
+</body>
+</html>

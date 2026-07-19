@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/register.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-blobs" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <main class="auth-wrap auth-wrap-wide">
+    <div id="form-card" class="auth-card card">
+      <div class="auth-logo">
+        <div class="auth-logo-ring">
+          <img src="/assets/logo.png" alt="IdeaVault" class="auth-logo-img" width="56" height="56" />
+        </div>
+        <h1 class="auth-brand">Join IdeaVault</h1>
+        <p class="auth-tagline">Create your founder profile</p>
+      </div>
+
+      <div id="reg-msg" class="auth-msg" role="status"></div>
+
+      <form id="reg-form" class="reg-grid" novalidate>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="name">Full Name <span class="req">*</span></label>
+          <input id="name" name="name" class="iv-input" type="text" required autocomplete="name" />
+        </div>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="email">Email <span class="req">*</span></label>
+          <input id="email" name="email" class="iv-input" type="email" required autocomplete="email" />
+        </div>
+        <div class="reg-field">
+          <label class="iv-label" for="phone">Phone (10 digits)</label>
+          <input id="phone" name="phone" class="iv-input" type="tel" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" placeholder="9876543210" />
+        </div>
+        <div class="reg-field">
+          <label class="iv-label" for="dob">Date of Birth <span class="req">*</span></label>
+          <input id="dob" name="dob" class="iv-input" type="date" required />
+        </div>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="password">Password <span class="req">*</span></label>
+          <input id="password" name="password" class="iv-input" type="password" required minlength="8" autocomplete="new-password" />
+        </div>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="password2">Confirm Password <span class="req">*</span></label>
+          <input id="password2" name="password2" class="iv-input" type="password" required autocomplete="new-password" />
+        </div>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="occupation">Occupation</label>
+          <input id="occupation" name="occupation" class="iv-input" type="text" autocomplete="organization-title" />
+        </div>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="address">Address</label>
+          <input id="address" name="address" class="iv-input" type="text" autocomplete="street-address" />
+        </div>
+        <div class="reg-field span-2">
+          <label class="iv-label" for="bio">Bio</label>
+          <textarea id="bio" name="bio" class="iv-input iv-textarea" rows="3" placeholder="Tell the community about you…"></textarea>
+        </div>
+        <div class="reg-field span-2">
+          <button type="submit" class="iv-btn iv-btn-primary iv-btn-block">
+            <i class="fa-solid fa-user-plus"></i> Create account
+          </button>
+        </div>
+      </form>
+
+      <p class="auth-footer">Already have an account? <a href="/login.html">Sign in</a></p>
+    </div>
+
+    <div id="success-card" class="auth-card card success-screen" hidden>
+      <div class="success-icon"><i class="fa-solid fa-envelope-circle-check"></i></div>
+      <h2 class="success-title">Check your email</h2>
+      <p class="success-text">
+        We sent a verification link to <strong id="sent-email"></strong>. Open it within 15 minutes to activate your account.
+      </p>
+      <a class="iv-btn iv-btn-secondary iv-btn-block" href="/login.html">Back to login</a>
+    </div>
+  </main>
+  <script src="/theme.js"></script>
+  <script src="/register.js"></script>
+</body>
+</html>

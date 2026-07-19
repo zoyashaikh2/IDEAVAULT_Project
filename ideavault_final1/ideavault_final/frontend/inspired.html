@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Get Inspired — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/dashboard.css" />
+  <style>
+    .inspired-page{max-width:1200px}
+    .inspired-head{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:22px}
+    .inspired-head h1{margin:0;font-size:1.8rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent-blue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;flex:1;min-width:200px}
+    .search-bar{display:flex;gap:10px;flex:1;max-width:420px}
+    .search-bar input{flex:1}
+    .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+    .cat-pill{padding:7px 18px;border-radius:50px;font-size:.85rem;font-weight:600;border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s}
+    .cat-pill.active,.cat-pill:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .ideas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+    .idea-card-outer{overflow:hidden;display:flex;flex-direction:column}
+    .idea-card-img{height:160px;background:linear-gradient(135deg,#e0e7ff,#dbeafe);position:relative;overflow:hidden}
+    .idea-card-img img{width:100%;height:100%;object-fit:cover}
+    .idea-card-badges{position:absolute;top:10px;left:10px;display:flex;gap:6px;flex-wrap:wrap}
+    .idea-card-crown{position:absolute;top:10px;right:10px;background:#fffbeb;color:#b45309;font-size:.7rem;font-weight:800;padding:3px 8px;border-radius:8px}
+    .idea-card-body{padding:16px 18px 12px;flex:1;display:flex;flex-direction:column;gap:8px}
+    .idea-card-creator{font-size:.82rem}
+    .idea-card-creator a{color:var(--accent);font-weight:600;text-decoration:none}
+    .idea-card-title{margin:0;font-size:1rem;font-weight:700;line-height:1.35}
+    .ai-box{font-size:0.92rem;line-height:1.55;color:var(--text);background:linear-gradient(135deg,rgba(59,130,246,.14),rgba(99,102,241,.1));border:1px solid rgba(59,130,246,.38);border-left:4px solid var(--accent-blue);padding:12px 14px;border-radius:0 12px 12px 0;display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+    .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.88rem}
+    .mini-cell{padding:10px 12px;border-radius:10px;background:var(--card);color:var(--text);border:1px solid var(--border);line-height:1.45}
+    .mini-cell.prob{border-left:3px solid #f87171}.mini-cell.sol{border-left:3px solid var(--success)}
+    .idea-card-foot{padding:12px 18px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+    @media(max-width:1024px){.ideas-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){.ideas-grid{grid-template-columns:1fr}.search-bar{max-width:100%}}
+  </style>
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button class="iv-nav-toggle" data-nav-toggle aria-label="Menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>👋 Welcome</div>
+        <div class="iv-topnav-actions">
+          <button class="iv-icon-btn" data-theme-toggle aria-label="Theme"></button>
+          <a class="iv-icon-btn" data-top-profile href="/profile.html" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+      <div class="iv-page inspired-page">
+        <div class="inspired-head">
+          <h1><i class="fa-solid fa-rocket"></i> Get Inspired</h1>
+          <div class="search-bar">
+            <input id="search" class="iv-input" placeholder="Search ideas…" aria-label="Search" />
+            <button class="iv-btn iv-btn-primary iv-btn-sm" id="btn-search"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </div>
+        </div>
+        <div class="cats" id="cats"></div>
+        <div class="ideas-grid" id="ideas-grid"><p class="empty">Loading ideas…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idea detail popup (reused from dashboard pattern) -->
+  <div class="iv-popup-backdrop" id="popup-idea">
+    <div class="iv-popup" role="dialog" aria-modal="true">
+      <button class="iv-popup-close" data-close-idea>✕</button>
+      <div class="iv-popup-body" id="idea-popup-body"></div>
+    </div>
+  </div>
+
+  <!-- Strategic analytics (same UX as dashboard) -->
+  <div class="iv-popup-backdrop" id="popup-strat" aria-hidden="true">
+    <div class="iv-popup iv-popup-full" role="dialog" aria-modal="true">
+      <button type="button" class="iv-popup-close" data-close-strat aria-label="Close">✕</button>
+      <div class="strat-toolbar">
+        <h2 class="strat-title" data-strat-title>Strategic Analytics</h2>
+        <div class="strat-actions">
+          <button type="button" class="iv-btn iv-btn-secondary iv-btn-sm" data-print-strat><i class="fa-solid fa-file-pdf"></i> Print report</button>
+        </div>
+      </div>
+      <div class="strat-panes">
+        <div class="strat-left iv-popup-body" data-strat-left></div>
+        <div class="strat-right iv-popup-body" data-strat-right></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
+  <script src="/iv-socket.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/contact-creator.js"></script>
+  <script src="/strategic-shared.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script src="/ideacard-shared.js"></script>
+  <script src="/venture-logic.js"></script>
+  <script>
+  var API = (window.location.origin && window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:5000') + '/api';
+  var CATS = ['All','AI/ML','SaaS','FinTech','EdTech','HealthTech','AgriTech','E-commerce','Real Estate','Social Impact','Web3','CleanTech','Other'];
+  var allIdeas = [];
+  var activeCat = 'All';
+  var searchQ = '';
+
+  function esc(s){var d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML;}
+
+  function checkAuthenticity(id) {
+    if (typeof window.IdeaVaultStrategic !== 'undefined' && window.IdeaVaultStrategic.checkAuthenticity) {
+      window.IdeaVaultStrategic.checkAuthenticity(id);
+    } else {
+      alert('Authenticity module loading...');
+    }
+  }
+
+  function downloadReport(id) {
+    window.open(API + '/reports/pdf/' + id, '_blank');
+  }
+
+  // Categories
+  var catsEl = document.getElementById('cats');
+  CATS.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='cat-pill'+(c==='All'?' active':'');
+    btn.textContent=c;
+    btn.addEventListener('click',function(){
+      activeCat=c;
+      catsEl.querySelectorAll('.cat-pill').forEach(function(x){x.classList.remove('active')});
+      btn.classList.add('active');
+      render();
+    });
+    catsEl.appendChild(btn);
+  });
+
+  document.getElementById('btn-search').addEventListener('click', function(){searchQ=document.getElementById('search').value.trim().toLowerCase();render();});
+  document.getElementById('search').addEventListener('keydown',function(e){if(e.key==='Enter'){searchQ=e.target.value.trim().toLowerCase();render();}});
+
+  function likedBy(idea){return (idea.likes||[]).some(function(x){return String(x)===String(window._ivUserId)});}
+
+  function renderCard(idea){
+    return IdeaVaultCard.render(idea, { isInspired: true });
+  }
+
+  function wireInspiredGrid(grid){
+    grid.querySelectorAll('[data-build-similar-id]').forEach(function(btn){
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        var bid=btn.getAttribute('data-build-similar-id');
+        if(window.IdeaVaultContact&&IdeaVaultContact.runBuildSimilarById) IdeaVaultContact.runBuildSimilarById(bid);
+      });
+    });
+    grid.querySelectorAll('[data-idea-id]').forEach(function(article){
+      var id=article.getAttribute('data-idea-id');
+      var idea=allIdeas.find(function(i){return String(i._id)===String(id);});
+      if(idea&&window.IdeaVaultCard&&IdeaVaultCard.initSparkline) IdeaVaultCard.initSparkline(id,idea.viewsHistory||[]);
+    });
+    if(window.IdeaVaultContact&&IdeaVaultContact.wireContactButtons) IdeaVaultContact.wireContactButtons(grid);
+  }
+
+  function render(){
+    var grid=document.getElementById('ideas-grid');
+    var filtered=allIdeas.filter(function(i){
+      if(activeCat!=='All'&&i.category!==activeCat) return false;
+      if(searchQ){var hay=(i.title+' '+i.category+' '+(i.tags||[]).join(' ')+(i.problem||'')).toLowerCase();if(!hay.includes(searchQ)) return false;}
+      return true;
+    });
+    if(!filtered.length){grid.innerHTML='<p class="empty">No ideas found.</p>';return;}
+    grid.innerHTML=filtered.map(renderCard).join('');
+    wireInspiredGrid(grid);
+    grid.querySelectorAll('[data-read]').forEach(function(btn){
+      btn.addEventListener('click',function(){openPopup(btn.getAttribute('data-read'));});
+    });
+    grid.querySelectorAll('[data-strat-open]').forEach(function(btn){
+      btn.addEventListener('click',function(e){e.stopPropagation();openStrat(btn.getAttribute('data-strat-open'));});
+    });
+    grid.querySelectorAll('[data-like]').forEach(function(btn){
+      btn.addEventListener('click',function(e){e.stopPropagation();toggleLike(btn);});
+    });
+    grid.querySelectorAll('[data-ai-pack]').forEach(function(btn){
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        runFullAiPack(btn.getAttribute('data-ai-pack'), btn);
+      });
+    });
+  }
+
+  function runFullAiPack(id, btn){
+    var tok=localStorage.getItem('ideavault_token')||'';
+    if(!tok){ alert('Sign in to save a full AI pack (summary, analysis, roadmap) on this idea.'); return; }
+    btn.disabled=true;
+    var prev=btn.textContent;
+    btn.textContent='Running…';
+    var headers={'Content-Type':'application/json','Authorization':'Bearer '+tok};
+    var urls=[
+      [API+'/ai/summary',{ideaId:id,force:false}],
+      [API+'/ai/analysis',{ideaId:id,force:false}],
+      [API+'/ai/roadmap',{ideaId:id,force:false}]
+    ];
+    var p=Promise.resolve();
+    urls.forEach(function(pair){
+      p=p.then(function(){
+        return fetch(pair[0],{method:'POST',headers:headers,body:JSON.stringify(pair[1])}).then(function(r){return r.json();}).then(function(d){if(d.error) throw new Error(d.error);});
+      });
+    });
+    p.then(function(){
+      btn.textContent='Done';
+      reloadInspired();
+      setTimeout(function(){btn.textContent=prev;btn.disabled=false;},1400);
+    }).catch(function(err){
+      btn.textContent=prev;
+      btn.disabled=false;
+      alert(err.message||'AI failed');
+    });
+  }
+
+  function toggleLike(btn){
+    var id=btn.getAttribute('data-like')||btn.getAttribute('data-like-p');
+    fetch(API+'/ideas/'+id+'/like',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:window._ivUserId})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(d.error) return;
+        btn.classList.toggle('liked',d.liked);
+        var s=btn.querySelector('.iv-like-count');if(s) s.textContent=String(d.count);
+      }).catch(function(){});
+  }
+
+  function openStrat(id){
+    if(!window.IdeaVaultStrategic){alert('Strategic module not loaded');return;}
+    fetch(API+'/ideas/'+encodeURIComponent(id)+'?noView=1').then(function(r){return r.json();}).then(function(idea){
+      if(!idea||idea.error) return;
+      document.querySelector('[data-strat-title]').textContent=idea.title||'Analytics';
+      document.querySelector('[data-strat-left]').innerHTML=IdeaVaultStrategic.stratLeftHtml(idea);
+      document.querySelector('[data-strat-right]').innerHTML=IdeaVaultStrategic.stratRightHtml(idea);
+      if(window.IdeaVaultContact&&IdeaVaultContact.wireContactButtons) IdeaVaultContact.wireContactButtons(document.querySelector('[data-strat-left]'));
+      document.getElementById('popup-strat').classList.add('is-open');
+    }).catch(function(){});
+  }
+
+  document.querySelector('[data-close-strat]').addEventListener('click',function(){document.getElementById('popup-strat').classList.remove('is-open');});
+  document.getElementById('popup-strat').addEventListener('click',function(e){if(e.target&&e.target.id==='popup-strat') document.getElementById('popup-strat').classList.remove('is-open');});
+  document.querySelector('[data-print-strat]').addEventListener('click',function(){window.print();});
+
+  function openPopup(id){
+    fetch(API+'/ideas/'+id).then(function(r){return r.json();}).then(function(idea){
+      if(idea.error) return;
+      var body=document.getElementById('idea-popup-body');
+      var sent=idea.aiSentiment&&idea.aiSentiment.overall;
+      var imgBg=idea.image&&idea.image.indexOf('data:')===0?'<img src="'+esc(idea.image)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35" />':'';
+      var strip=window.IdeaVaultStrategic&&IdeaVaultStrategic.analysisStripHtml?IdeaVaultStrategic.analysisStripHtml(idea):'';
+      body.innerHTML=strip
+        +'<div style="height:160px;border-radius:16px;margin-bottom:16px;background:linear-gradient(135deg,#6366f1,#3b82f6);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:16px;color:#fff">'+imgBg+'<h3 style="position:relative;margin:0;font-size:1.35rem">'+esc(idea.title)+'</h3></div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"><span class="iv-pill">'+esc(idea.category||'')+'</span><span class="iv-pill">'+esc(sent||'Sentiment n/a')+'</span><a class="iv-pill" href="/profile.html?userId='+esc(idea.userId)+'">Creator</a></div>'
+        +'<div style="padding:16px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(99,102,241,.08));margin-bottom:16px;font-size:0.95rem;line-height:1.55;color:var(--text)"><strong style="display:block;margin-bottom:6px;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent)">AI summary</strong>'+esc(idea.aiSummary||idea.summary||'No AI summary yet.')+'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'
+        +'<div style="padding:14px;border-radius:14px;border:1px solid var(--border);border-left:4px solid #f87171;font-size:.9rem"><strong>Problem</strong><p style="margin:8px 0 0">'+esc(idea.problem||'')+'</p></div>'
+        +'<div style="padding:14px;border-radius:14px;border:1px solid var(--border);border-left:4px solid var(--success);font-size:.9rem"><strong>Solution</strong><p style="margin:8px 0 0">'+esc(idea.solution||'')+'</p></div></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;font-size:.85rem;text-align:center">'
+        +'<div class="card" style="padding:10px">Likes<br><strong>'+((idea.likes||[]).length)+'</strong></div>'
+        +'<div class="card" style="padding:10px">Comments<br><strong>'+((idea.comments||[]).length)+'</strong></div>'
+        +'<div class="card" style="padding:10px">Innovation<br><strong>'+(idea.aiAnalysis&&idea.aiAnalysis.innovationScore!=null?idea.aiAnalysis.innovationScore:'—')+'</strong></div>'
+        +'<div class="card" style="padding:10px">Views<br><strong>'+(idea.views||0)+'</strong></div></div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">'
+        +'<button class="iv-like'+(likedBy(idea)?' liked':'')+'" data-like-p="'+esc(idea._id)+'"><svg viewBox="0 0 24 24"><path d="M12 21s-6.716-4.576-9-8.5C.5 8.5 2 5 6 5c2.5 0 4.5 2 6 3.5C13.5 7 15.5 5 18 5c4 0 5.5 3.5 4 7.5-2.284 3.924-9 8.5-9 8.5z"/></svg> Like</button>'
+        +'<button class="iv-btn iv-btn-sm" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;box-shadow:0 4px 15px rgba(99,102,241,0.4)" type="button" data-open-strat-popup="'+esc(idea._id)+'">Strategic Analytics</button>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;margin-bottom:16px">'
+        +'<button type="button" class="iv-btn iv-btn-secondary iv-btn-sm" id="btn-inspired-contact"><i class="fa-solid fa-address-card"></i> Contact creator</button>'
+        +'</div>'
+        +(idea.referenceLink?'<a class="iv-btn iv-btn-ghost iv-btn-sm" href="'+esc(idea.referenceLink)+'" target="_blank"><i class="fa-solid fa-link"></i> Reference Link</a>':'')
+        +'</div>'
+        +'<h4 style="margin:16px 0 8px">Community Comments</h4>'
+        +'<ul style="list-style:none;padding:0;margin:0 0 12px;font-size:.9rem;color:var(--muted)">'
+        +(idea.comments&&idea.comments.length?idea.comments.map(function(c){return '<li style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>'+esc(c.user||'User')+'</strong><br>'+esc(c.text)+'</li>';}).join(''):'<li>No comments yet.</li>')
+        +'</ul>'
+        +'<div style="display:flex;gap:8px">'
+        +'<input class="iv-input" style="flex:1" placeholder="Add a comment…" data-comment-text />'
+        +'<button class="iv-btn iv-btn-primary iv-btn-sm" data-post-comment="'+esc(idea._id)+'">Post</button></div>';
+
+      document.getElementById('popup-idea').classList.add('is-open');
+
+      var cbtn=body.querySelector('#btn-inspired-contact');
+      if(cbtn&&window.IdeaVaultContact){
+        cbtn.addEventListener('click',function(){
+          function go(){IdeaVaultContact.openFromIdea(idea);}
+          if(idea.userId&&(!idea.email&&!idea.phone)){
+            fetch(API+'/user/'+encodeURIComponent(idea.userId)).then(function(r){return r.json();}).then(function(u){
+              if(u&&!u.error){idea.email=idea.email||u.email;idea.phone=idea.phone||u.phone;idea.name=idea.name||u.name;}
+              go();
+            }).catch(go);
+          }else go();
+        });
+      }
+
+      var lp=body.querySelector('[data-like-p]');
+      if(lp) lp.addEventListener('click',function(){toggleLike(lp);});
+
+      var stBtn=body.querySelector('[data-open-strat-popup]');
+      if(stBtn) stBtn.addEventListener('click',function(){openStrat(stBtn.getAttribute('data-open-strat-popup'));});
+
+      body.querySelector('[data-post-comment]').addEventListener('click',function(){
+        var inp=body.querySelector('[data-comment-text]');
+        var txt=inp&&inp.value.trim();if(!txt) return;
+        fetch(API+'/ideas/'+idea._id+'/comment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:window._ivUserId,user:window._ivUser&&window._ivUser.name,text:txt})})
+          .then(function(){inp.value='';openPopup(idea._id);}).catch(function(){});
+      });
+    }).catch(function(){});
+  }
+
+  document.querySelector('[data-close-idea]').addEventListener('click',function(){document.getElementById('popup-idea').classList.remove('is-open');});
+  document.getElementById('popup-idea').addEventListener('click',function(e){if(e.target&&e.target.id==='popup-idea') document.getElementById('popup-idea').classList.remove('is-open');});
+
+  fetch(API+'/ideas?publicOnly=1').then(function(r){return r.json();}).then(function(ideas){
+    allIdeas=(ideas||[]).filter(function(i){return i.status==='Published';});
+    render();
+  }).catch(function(){document.getElementById('ideas-grid').innerHTML='<p class="empty">Could not load ideas.</p>';});
+
+  function reloadInspired(){
+    fetch(API+'/ideas?publicOnly=1').then(function(r){return r.json();}).then(function(ideas){
+      allIdeas=(ideas||[]).filter(function(i){return i.status==='Published';});
+      render();
+    }).catch(function(){});
+  }
+  document.addEventListener('ideavault:refresh', reloadInspired);
+  </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Idea — IdeaVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/components.css" />
+  <link rel="stylesheet" href="/create-idea.css" />
+</head>
+<body class="iv-app">
+  <div class="iv-sidebar-overlay" data-sidebar-overlay></div>
+  <div class="iv-layout">
+    <div class="iv-sidebar-slot" id="sidebar-container"></div>
+    <div class="iv-main">
+      <header class="iv-topnav">
+        <div class="iv-topnav-left">
+          <button type="button" class="iv-nav-toggle" data-nav-toggle aria-label="Open menu">☰</button>
+        </div>
+        <div class="iv-greet" data-top-greet>👋 Create</div>
+        <div class="iv-topnav-actions">
+          <button type="button" class="iv-icon-btn" data-theme-toggle aria-label="Toggle theme"></button>
+          <a data-top-profile href="/profile.html" class="iv-icon-btn" aria-label="Profile"><i class="fa-solid fa-user"></i></a>
+          <button type="button" class="iv-btn iv-btn-ghost iv-btn-sm" data-top-logout>Logout</button>
+        </div>
+      </header>
+
+      <div class="iv-page create-page">
+        <h1 class="create-title">Create your idea</h1>
+        <p class="create-sub">Generate with AI, validate authenticity, then save as Draft or Publish.</p>
+
+        <section class="card create-ai-box">
+          <div class="create-ai-head">
+            <h2 class="create-h2"><i class="fa-solid fa-robot"></i> AI Idea Generator</h2>
+            <span class="iv-badge iv-badge-accent">Auto-fill</span>
+          </div>
+          <div class="create-ai-grid">
+            <div>
+              <label class="iv-label" for="gen-desc">Describe your idea concept</label>
+              <textarea id="gen-desc" class="iv-input create-textarea" rows="3" placeholder="e.g., AI assistant that automates cloud cost optimization for startups..."></textarea>
+            </div>
+            <div>
+              <label class="iv-label" for="gen-category">Category</label>
+              <select id="gen-category" class="iv-input"></select>
+            </div>
+            <div class="span-2">
+              <button type="button" class="iv-btn iv-btn-primary" id="btn-generate">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Idea with AI
+              </button>
+              <span class="create-ai-status" id="gen-status"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card create-form-card">
+          <form id="idea-form" class="create-form" novalidate>
+            <input type="hidden" id="idea-id" />
+            <div class="create-grid">
+              <div class="span-2">
+                <label class="iv-label" for="title">Title <span class="req">*</span></label>
+                <input id="title" class="iv-input" required placeholder="Your startup title" />
+              </div>
+              <div>
+                <label class="iv-label" for="category">Category</label>
+                <select id="category" class="iv-input"></select>
+              </div>
+              <div>
+                <label class="iv-label" for="tags">Tags</label>
+                <input id="tags" class="iv-input" placeholder="devops, AI, kubernetes" />
+              </div>
+              <div class="span-2">
+                <label class="iv-label" for="idealCustomer">Ideal Customer</label>
+                <input id="idealCustomer" class="iv-input" placeholder="Who is this for?" />
+              </div>
+              <div class="span-2">
+                <label class="iv-label" for="problem">Problem Statement <span class="req">*</span></label>
+                <textarea id="problem" class="iv-input create-textarea" rows="4" required placeholder="What pain are you solving?"></textarea>
+              </div>
+              <div class="span-2">
+                <label class="iv-label" for="solution">Solution</label>
+                <textarea id="solution" class="iv-input create-textarea" rows="4" placeholder="How will you solve it?"></textarea>
+              </div>
+              <div class="span-2">
+                <label class="iv-label" for="summary">Founder Summary</label>
+                <textarea id="summary" class="iv-input create-textarea" rows="3" placeholder="Short founder-written summary (optional)"></textarea>
+              </div>
+              <div>
+                <label class="iv-label" for="link">Reference Link</label>
+                <input id="link" class="iv-input" placeholder="https://..." />
+              </div>
+              <div>
+                <label class="iv-label" for="status">Status</label>
+                <select id="status" class="iv-input">
+                  <option>Draft</option>
+                  <option>Published</option>
+                </select>
+              </div>
+              <div class="span-2">
+                <label class="iv-label" for="image">Image upload</label>
+                <input id="image" class="iv-input" type="file" accept="image/*" />
+                <div class="create-img-row">
+                  <img id="img-preview" class="create-img" alt="" hidden />
+                  <button type="button" class="iv-btn iv-btn-secondary iv-btn-sm" id="btn-clear-img" hidden>Remove</button>
+                </div>
+              </div>
+              <div class="span-2 create-actions">
+                <button type="button" class="iv-btn iv-btn-secondary" id="btn-duplicate">
+                  <i class="fa-solid fa-shield-halved"></i> AI Duplicate & Authenticity Check
+                </button>
+              </div>
+            </div>
+
+            <div class="create-ai-actions">
+              <div class="create-toggle" data-toggle="summary">
+                <div class="t-head">Summary</div>
+                <div class="t-sub">3-sentence executive summary</div>
+              </div>
+              <div class="create-toggle" data-toggle="analysis">
+                <div class="t-head">Analysis</div>
+                <div class="t-sub">Market + risk + scoring JSON</div>
+              </div>
+              <div class="create-toggle" data-toggle="roadmap">
+                <div class="t-head">Roadmap</div>
+                <div class="t-sub">4 phases with budget + tasks</div>
+              </div>
+            </div>
+            <div class="create-submit-row">
+              <button type="submit" class="iv-btn iv-btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i> Save Idea
+              </button>
+              <span class="create-save-status" id="save-status"></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="create-results">
+          <div class="card create-result" id="box-summary" hidden>
+            <h3 class="create-h3">AI Summary</h3>
+            <p id="out-summary"></p>
+          </div>
+          <div class="card create-result" id="box-analysis" hidden>
+            <h3 class="create-h3">AI Analysis</h3>
+            <div id="out-analysis" class="create-analysis-html"></div>
+          </div>
+          <div class="card create-result" id="box-roadmap" hidden>
+            <h3 class="create-h3">AI Roadmap</h3>
+            <div id="out-roadmap" class="create-roadmap-html"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="iv-popup-backdrop" id="popup-dup" aria-hidden="true">
+    <div class="iv-popup" role="dialog" aria-modal="true">
+      <button type="button" class="iv-popup-close" data-close-dup aria-label="Close">✕</button>
+      <div class="iv-popup-body" id="dup-body"></div>
+    </div>
+  </div>
+
+  <script src="/iv-categories.js"></script>
+  <script src="/iv-money.js"></script>
+  <script src="/theme.js"></script>
+  <script src="/sidebar.js"></script>
+  <script src="/auth-guard.js"></script>
+  <script src="/create-idea.js?v=2"></script>
+</body>
+</html>

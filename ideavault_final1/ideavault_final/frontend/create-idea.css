@@ -1,0 +1,236 @@
+.create-page {
+  max-width: 1100px;
+}
+
+.create-title {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.create-sub {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 1.02rem;
+}
+
+.create-h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.create-h3 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+.create-analysis-html,
+.create-roadmap-html {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.create-analysis-html .ai-prose h4,
+.create-roadmap-html h4 {
+  margin: 14px 0 8px;
+  font-size: 0.95rem;
+}
+.create-analysis-html .swot-mini {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.create-analysis-html .swot-mini ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.create-roadmap-html .roadmap-phase {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: var(--bg);
+}
+
+.create-ai-box {
+  padding: 22px 22px 18px;
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  background: linear-gradient(120deg, rgba(99, 102, 241, 0.08), rgba(59, 130, 246, 0.06));
+  margin-bottom: 18px;
+}
+
+.create-ai-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.create-ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 14px 16px;
+}
+
+.create-ai-grid .span-2 {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.create-ai-status,
+.create-save-status {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.create-form-card {
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.req {
+  color: var(--danger);
+}
+
+.create-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+.create-grid .span-2 {
+  grid-column: span 2;
+}
+
+.create-textarea {
+  resize: vertical;
+  min-height: 92px;
+}
+
+.create-img-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.create-img {
+  width: 140px;
+  height: 90px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  background: var(--bg);
+}
+
+.create-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.create-ai-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.create-toggle {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  background: var(--card);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.create-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.create-toggle.is-on {
+  border-color: rgba(99, 102, 241, 0.55);
+  background: linear-gradient(120deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.06));
+}
+
+.t-head {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.t-sub {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.create-submit-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.create-results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+
+.create-result {
+  padding: 18px 20px;
+}
+
+.create-result p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.create-pre {
+  margin: 0;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  overflow: auto;
+  max-height: 420px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+@media (max-width: 860px) {
+  .create-ai-grid {
+    grid-template-columns: 1fr;
+  }
+  .create-ai-grid .span-2 {
+    grid-column: span 1;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .create-grid {
+    grid-template-columns: 1fr;
+  }
+  .create-grid .span-2 {
+    grid-column: span 1;
+  }
+  .create-ai-actions {
+    grid-template-columns: 1fr;
+  }
+  .create-submit-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
