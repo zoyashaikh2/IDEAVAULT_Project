@@ -1,0 +1,2 @@
+# IDEAVAULT
+IdeaVault is a full-stack AI platform connecting startup founders with investors. It delivers AI-generated SWOT analysis, revenue projections, and roadmaps via Google Gemini and Groq. Nine custom ML algorithms score ideas on viability, sentiment, and uniqueness. Investors get ML-powered matching, deal pipelines, and Razorpay-based funding. Features include real-time Socket.io updates, JWT auth, magic links, and live MongoDB-driven dashboards.
